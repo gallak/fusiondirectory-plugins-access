@@ -1,0 +1,33 @@
+##
+## access-fd-conf.schema - Needed by Fusion Directory for managing websso configuration
+## OID 141
+
+# Attributes
+attributetype ( 1.3.6.1.4.1.38414.141.1.1 NAME 'fdAccessFederationRDN'
+        DESC 'FusionDirectory - Federation RDN'
+        EQUALITY caseIgnoreIA5Match
+        SUBSTR caseIgnoreSubstringsMatch
+        SYNTAX 1.3.6.1.4.1.1466.115.121.1.26
+        SINGLE-VALUE )
+
+attributetype ( 1.3.6.1.4.1.38414.141.1.2 NAME 'fdAccessAttributesRDN'
+        DESC 'FusionDirectory - Attributes RDN'
+        EQUALITY caseIgnoreIA5Match
+        SUBSTR caseIgnoreSubstringsMatch
+        SYNTAX 1.3.6.1.4.1.1466.115.121.1.26
+        SINGLE-VALUE )
+
+attributetype ( 1.3.6.1.4.1.38414.141.1.3 NAME 'fdAccessConfigReferential'
+        DESC 'FusionDirectory - name of referential'
+        EQUALITY caseIgnoreIA5Match
+        SUBSTR caseIgnoreSubstringsMatch
+        SYNTAX 1.3.6.1.4.1.1466.115.121.1.26
+        SINGLE-VALUE )
+
+
+# Object Class
+objectclass (1.3.6.1.4.1.38414.141.2.1 NAME 'fdAccessPluginConf'
+        SUP top AUXILIARY
+        DESC 'FusionDirectory -Config Access ObjectClass'
+        MUST ()
+        MAY (fdAccessFederationRDN $ fdAccessAttributesRDN $ fdAccessConfigReferential))

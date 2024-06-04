@@ -1,0 +1,30 @@
+information :
+  name : "accessmanagement"
+  description : "plugins which allow to generate accessmanagement / SAML Federation"
+  version : "0.1"
+  authors : ['antoine.gallavardin@free.fr']
+  status : "dev"
+  screenshotUrl:
+   - https://raw.githubusercontent.com/gallak/fusiondirectory-plugins-accessmanagement/master/example.png
+  logoUrl : https://raw.githubusercontent.com/gallak/fusiondirectory-plugins-accessmanagement/master/html/themes/breezy/icons/48/apps/notes.png
+  tags : ["sso","saml","shibboleh","configuration"]
+  license : "GPLv2"
+  origin : "source"
+
+support :
+  provider : "community"
+  homeUrl : "https://github.com/gallak/fusiondirectory-plugins-accessmanagement"
+  ticketUrl : "https://github.com/gallak/fusiondirectory-plugins-accessmanagement/issues"
+  discussionUrl : "https://github.com/gallak/fusiondirectory-plugins-accessmanagement/wiki"
+  downloadUrl: "https://github.com/gallak/fusiondirectory-plugins-accessmanagement/archive/refs/heads/master.zip"
+  schemaUrl : "https://schemas.fusiondirectory.info/"
+
+requirement:
+  fdVersion : 1.4
+  phpVersion : 7.2.0
+
+content :
+  fileList :
+  - './locale/fr/fusiondirectory.po'
+  - './locale/en/fusiondirectory.po'
+  - './contrib/yaml/description.yaml'
