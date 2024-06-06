@@ -145,8 +145,8 @@ objectclass (1.3.6.1.4.1.38414.142.4.1 NAME 'fdAccessService'
 objectclass (1.3.6.1.4.1.38414.142.4.2 NAME 'fdAccessApplication'
         SUP top AUXILIARY
         DESC 'FusionDirectory - Access Application Config'
-        MUST (fdAccessApplicationAuthType $ fdAccessApplicationService)
-        MAY (fdAccessApplicationAttributes $ fdAccessApplicationSettings $ fdAccessApplicationAuthServerDn $ fdAccessApplicationMacros $ fdAccessApplicationSAMLMetadataFile $ fdAccessApplicationScopeRules))
+        MUST (fdAccessApplicationAuthType)
+        MAY (fdAccessApplicationAttributes $ fdAccessApplicationSettings $ fdAccessApplicationAuthServerDn $ fdAccessApplicationMacros $ fdAccessApplicationSAMLMetadataFile $ fdAccessApplicationScopeRules $ fdAccessApplicationService))
 
 objectclass (1.3.6.1.4.1.38414.142.4.3 NAME 'fdAccessFederation'
         DESC 'FusionDirectory - Federation Declaration'
