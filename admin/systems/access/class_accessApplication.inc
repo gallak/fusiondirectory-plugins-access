@@ -112,14 +112,10 @@ class accessWebApplication extends simplePlugin
   function importconfig(){
     $this->createAccessConnection();
     $importedConfig=$this->remoteAccessHandle->importApplication($this->fdAccessApplicationAuthType,$this->parent->getBaseObject()->cn);
-
-    var_dump($this->fdAccessApplicationScopeRules);
-    $this->attributesAccess['fdAccessApplicationScopeRules']->setValue($importedConfig['fdAccessApplicationScopeRules']);
-    var_dump($this->attributesAccess['fdAccessApplicationScopeRules']->getValue());
-    $this->update2();
-    
+    // fixme import function should only import inside the UI not directly Save it
+    $this->fdAccessApplicationMacros=$importedConfig['macros'];
+    $this->save();
   }
-
 
   function generateAppData(){
       global $config;
@@ -220,7 +216,14 @@ class accessWebApplication extends simplePlugin
           new ButtonAttribute(_('Import configuration'), _('Import configuration'),
               'fdAccessApplicationImportConfiguration', _('Import'),'importconfig'
           ),
-          
+          new OrderedArrayAttribute(
+            new URLAttribute(
+              _('Service URIS'), _('Service URIS'),
+              'fdAccessApplicationService', TRUE
+            ),
+            // Order disabled, Default values, Edit enabled
+            FALSE, [], TRUE
+          ),        
         ],
       ],
 
