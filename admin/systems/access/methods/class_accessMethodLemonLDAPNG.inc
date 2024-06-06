@@ -247,14 +247,21 @@ public function doLogin() {
         $handle=new LemonLDAPNG($this->serviceConfig);
         $res=$handle->$getfct($appConfKey);
 
-        //var_dump($res['data']['scopeRules']);
+     
         // import scopeRule
         foreach($res['data']['scopeRules'] as $key => $value){
             $arrayScopeRule[]=$key.";".$value;
         }
+        // import macros
+        foreach($res['data']['macros'] as $key => $value){
+            $arrayMacros[]=$key.";".$value;
+        }        
+
         //var_dump($arrayScopeRule);
-        $imported['fdAccessApplicationScopeRules']=$arrayScopeRule;
-            
+        //$imported['fdAccessApplicationScopeRules']=$arrayScopeRule;
+        
+        $imported['macros']=$arrayMacros;
+        //return($imported);
         return($imported);
         //$format['fdAccessApplicationScopeRules']=$res['data']['scopeRules']
         //return($res['data']);
@@ -330,10 +337,13 @@ public function doLogin() {
 
         // configuration manipulation for CAS method        
         if ( $appConfig['type']== "CAS"){
+            // set Service URI
+            $llngapp['options']['service']=$appConfig['service'];
             // set attributes
             foreach( $appConfig['attributes'] as $key => $value){
                 $llngapp['exportedVars'][$key]=$value['friendlyName'];
             }
+            
                
         }
         // configuration manipulation for SAML method
@@ -360,21 +370,15 @@ public function doLogin() {
 
             // add extraClaim
             $scopeArray=array();
-            $scopeRulesArray=array();
-            $llngapp['extraClaims']=$scopeArray;
-            // FIXME extraClaims a 2 endroits ? BUG ????
-            $llngapp['options']['extraClaims']=$scopeArray;
-            // add scopeRules
-            //$llngapp['scopeRules']=array();
-
+            
             // move options why ????
-            $llngapp['clientId'] = $llngapp['options']['ClientID'];
-            $llngapp['redirectUris'] = $llngapp['options']['RedirectUris'];
+            $llngapp['clientId'] = $llngapp['options']['clientID'];
+            $llngapp['redirectUris'] = $appConfig['service'];
 
-            unset($llngapp['options']['clientID']);
+            //unset($llngapp['options']['clientID']);
             // FIXME WORTEKS : RedirectUris a 2 endroits ?? BUG????
             //unset($llngapp['options']['RedirectUris']);
-                      
+            unset($llngapp['options']['service']);
             // add attribute
             foreach( $appConfig['attributes'] as $key => $value){
                 //var_dump($value);
@@ -390,6 +394,7 @@ public function doLogin() {
             }
             if (!empty($scopeArray)){
                 $llngapp['extraClaims']=$scopeArray;
+                $llngapp['options']['extraClaims']=$scopeArray;
             }
             // /!\ en cas de replace , les valeurs sont mergée !!!  BUG ??????
             if ($appConfig['scopeRules']){
@@ -404,7 +409,7 @@ public function doLogin() {
         
         }
 
-        //var_dump($llngapp);
+        var_dump($llngapp);
         //clean empty values
         //TODO
              

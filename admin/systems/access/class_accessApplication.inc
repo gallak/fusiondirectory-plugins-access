@@ -162,20 +162,10 @@ class accessWebApplication extends simplePlugin
       if ( isset($this->fdAccessApplicationScopeRules)){
         $application['scopeRules'] = $this->fdAccessApplicationScopeRules;
       }
+      // add service URI
+      $application['service']=$this->fdAccessApplicationService;
+      
 
-/*
-      foreach($this->fdAccessApplicationMacros as $macro_infos) {
-        $array_macro=preg_split("/;/", $macro_infos);
-        $application['macros'][$array_macro[0]]=$array_macro[1];
-      }
-      // fetch options
-      foreach($this->fdAccessApplicationSettings as $settings_infos) {
-        $array_settings=preg_split("/;/", $settings_infos);
-
-        FIXME : un setings peut être multi valué
-        $application['options'][$array_settings[0]]=$array_settings[1];
-      }
-*/
       return($application);
 
 
@@ -219,7 +209,7 @@ class accessWebApplication extends simplePlugin
           new OrderedArrayAttribute(
             new URLAttribute(
               _('Service URIS'), _('Service URIS'),
-              'fdAccessApplicationService', TRUE
+              'fdAccessApplicationService', FALSE
             ),
             // Order disabled, Default values, Edit enabled
             FALSE, [], TRUE
@@ -355,12 +345,15 @@ class accessWebApplication extends simplePlugin
     
     if ($this->fdAccessApplicationAuthType == "SAML" ){
       $this->attributesAccess['fdAccessApplicationSAMLMetadataFile']->setVisible(TRUE);
+      $this->attributesAccess['fdAccessApplicationService']->setVisible(FALSE);
     }else{
       $this->attributesAccess['fdAccessApplicationSAMLMetadataFile']->setVisible(FALSE);
+      $this->attributesAccess['fdAccessApplicationService']->setVisible(TRUE);
     }
     
     if ($this->fdAccessApplicationAuthType == "OIDC" ){
       $this->attributesAccess['fdAccessApplicationScopeRules']->setVisible(TRUE);
+      $this->attributesAccess['fdAccessApplicationService']->setVisible(TRUE);
     }else{
       $this->attributesAccess['fdAccessApplicationScopeRules']->setVisible(FALSE);
     }
