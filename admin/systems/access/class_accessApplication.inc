@@ -25,8 +25,8 @@ class accessWebApplication extends simplePlugin
   protected $displayHeader  = TRUE;
   protected $loaded = FALSE;
   public $protocol = "CAS";
-  
-  //public $locationsArray=['cabinet' => 'fdDcimComponentCabinetDn','zone' => 'fdDcimComponentZoneDn','virtual' => 'fdDcimVirtualManagementServerDn'];
+  // handle contain remote Access Management Service
+  private $remoteAccessHandle;
 
   static function plInfo (): array
   {
@@ -40,56 +40,27 @@ class accessWebApplication extends simplePlugin
     ];
   }
 
-  /*
-  function pushconfig(){
-    global $config;
-    $ldap = $config->get_ldap_link();
-    $ldap->cd($this->fdAccessApplicationAuthServerDn);
-    $ldap->search('(objectClass=fdAccessService)', ['fdAccessServiceType','fdAccessServiceURL','fdAccessServiceUser','fdAccessServicePassword']);
-    $attrs = $ldap->fetch();
-    var_dump($attrs);
-    $serviceClass="accessMethod".$attrs['fdAccessServiceType'][0];
-    $srv = new $serviceClass;
-    $srv->connect();
-    $srv->addApplication();
-    $srv->updateApplication();
-    $srv->removeApplication();
 
-    fonction  de recuperation des infos dans un structure AppData
-
-    focntion de géneration  AppData to json
-
-    focntion d'injection
-  }*/
-
-  function pushconfig(){
-    // get Application DATA
-    //$this->generateAppData();
-    // get corresponding service Type
+  private function createAccessConnection(){
     global $config;
     $ldap = $config->get_ldap_link();
     $ldap->cd($this->fdAccessApplicationAuthServerDn);
     $ldap->search('(objectClass=fdAccessService)', ['fdAccessServiceType','fdAccessServiceURL','fdAccessServiceUser','fdAccessServicePassword']);
     $attrs = $ldap->fetch();
     $serviceClass="accessMethod".$attrs['fdAccessServiceType'][0];
-    $srv = new $serviceClass;
-    $srv->setConfig(array("base_url" => $attrs['fdAccessServiceURL'][0],"username" => $attrs['fdAccessServiceUser'][0], "password" => $attrs['fdAccessServicePassword'][0]));
-    $jsonAppData = $srv->generateConfig($this->generateAppData());
-   // var_dump($jsonAppData);
-    //$srv->addApplication($this->fdAccessApplicationAuthType, $jsonAppData);
-    $srv->updateApplication($this->fdAccessApplicationAuthType, $jsonAppData);
+    $this->remoteAccessHandle = new $serviceClass;
+    $this->remoteAccessHandle->setConfig(array("base_url" => $attrs['fdAccessServiceURL'][0],"username" => $attrs['fdAccessServiceUser'][0], "password" => $attrs['fdAccessServicePassword'][0]));
+  }
+
+  function pushconfig(){
+    $this->createAccessConnection();
+    $jsonAppData = $this->remoteAccessHandle->generateConfig($this->generateAppData());
+    $this->remoteAccessHandle->updateApplication($this->fdAccessApplicationAuthType, $jsonAppData);
   }
 
   function deleteconfig(){
-    global $config;
-    $ldap = $config->get_ldap_link();
-    $ldap->cd($this->fdAccessApplicationAuthServerDn);
-    $ldap->search('(objectClass=fdAccessService)', ['fdAccessServiceType','fdAccessServiceURL','fdAccessServiceUser','fdAccessServicePassword']);
-    $attrs = $ldap->fetch();
-    $serviceClass="accessMethod".$attrs['fdAccessServiceType'][0];
-    $srv = new $serviceClass;
-    $srv->setConfig(array("base_url" => $attrs['fdAccessServiceURL'][0],"username" => $attrs['fdAccessServiceUser'][0], "password" => $attrs['fdAccessServicePassword'][0]));
-    $srv->deleteApplication($this->fdAccessApplicationAuthType,$this->parent->getBaseObject()->cn);
+    $this->createAccessConnection();
+    $this->remoteAccessHandle->deleteApplication($this->fdAccessApplicationAuthType,$this->parent->getBaseObject()->cn);
   }
 
 
@@ -130,43 +101,23 @@ class accessWebApplication extends simplePlugin
 
 
   function compareconfig(){
-    global $config;
-    $ldap = $config->get_ldap_link();
-    $ldap->cd($this->fdAccessApplicationAuthServerDn);
-    $ldap->search('(objectClass=fdAccessService)', ['fdAccessServiceType','fdAccessServiceURL','fdAccessServiceUser','fdAccessServicePassword']);
-    $attrs = $ldap->fetch();
-    $serviceClass="accessMethod".$attrs['fdAccessServiceType'][0];
-    $srv = new $serviceClass;
-    $srv->setConfig(array("base_url" => $attrs['fdAccessServiceURL'][0],"username" => $attrs['fdAccessServiceUser'][0], "password" => $attrs['fdAccessServicePassword'][0]));
-    $remoteconfig=$srv->getApplication($this->fdAccessApplicationAuthType,$this->parent->getBaseObject()->cn)['data'];
-    
-    $localconfig = json_decode($srv->generateConfig($this->generateAppData()),true);
-    //var_dump($localconfig);
-    //var_dump($remoteconfig);
-
+    $this->createAccessConnection();
+    $remoteconfig=$this->remoteAccessHandle->getApplication($this->fdAccessApplicationAuthType,$this->parent->getBaseObject()->cn)['data'];
+    $localconfig = json_decode($this->remoteAccessHandle->generateConfig($this->generateAppData()),true);
     var_dump($this->array_diff_recursive($remoteconfig,$localconfig));
   }
 
 
 
   function importconfig(){
-    global $config;
-    $ldap = $config->get_ldap_link();
-    $ldap->cd($this->fdAccessApplicationAuthServerDn);
-    $ldap->search('(objectClass=fdAccessService)', ['fdAccessServiceType','fdAccessServiceURL','fdAccessServiceUser','fdAccessServicePassword']);
-    $attrs = $ldap->fetch();
-    $serviceClass="accessMethod".$attrs['fdAccessServiceType'][0];
-    $srv = new $serviceClass;
-    $srv->setConfig(array("base_url" => $attrs['fdAccessServiceURL'][0],"username" => $attrs['fdAccessServiceUser'][0], "password" => $attrs['fdAccessServicePassword'][0]));
-    $importedConfig=$srv->importApplication($this->fdAccessApplicationAuthType,$this->parent->getBaseObject()->cn);
+    $this->createAccessConnection();
+    $importedConfig=$this->remoteAccessHandle->importApplication($this->fdAccessApplicationAuthType,$this->parent->getBaseObject()->cn);
 
-    
-    //parent::update();
-    $this->fdAccessApplicationScopeRules=$importedConfig['fdAccessApplicationScopeRules'];
-    
-    
     var_dump($this->fdAccessApplicationScopeRules);
-    parent::update();
+    $this->attributesAccess['fdAccessApplicationScopeRules']->setValue($importedConfig['fdAccessApplicationScopeRules']);
+    var_dump($this->attributesAccess['fdAccessApplicationScopeRules']->getValue());
+    $this->update2();
+    
   }
 
 
@@ -460,6 +411,13 @@ class accessWebApplication extends simplePlugin
     return TRUE;
   }
 
+
+  public function update2 (): bool
+  {
+    parent::update();
+
+    return TRUE;
+  }
 
   protected function prepare_save (): array
   {
