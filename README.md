@@ -16,6 +16,9 @@ You could create a remote Access Service (Only LemonLDAP::NG service supported)
 You could define SAML/OIDC/CAS applications and apply to a remote Access Service
 You could import remote SAML configuration (trough Federation Metadata) in order to import some of them
 
+## Dependencies
+This plugin need taxonomy plugin because all config parameters is stored inside a taxonomy table. It's useful if settings of remote service are modified during software evolutions.
+
 ## Todo
   - Create dashboard
   - Import remote config
