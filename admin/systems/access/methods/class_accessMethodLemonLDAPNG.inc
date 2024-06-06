@@ -313,8 +313,8 @@ public function doLogin() {
             $array_settings=preg_split("/;/", $settings_infos);
             // convert LL:NG internal value to API value ex : oidcRPMetaDataOptionRedirectUris  => redirectUris
             $sub="/^".$this->mapping[$appConfig['type']]."Options/";
-            //$newkey=lcfirst(preg_replace($sub,"",$array_settings[0]));
-            $newkey=preg_replace($sub,"",$array_settings[0]);                
+            // remote options seems to be case Sensitive
+            $newkey=lcfirst(preg_replace($sub,"",$array_settings[0]));
             // take care of multivaluated variables
             if ( in_array($newkey,  $options_array )){
                 if ( $llngapp['options'][$newkey] == null ){
