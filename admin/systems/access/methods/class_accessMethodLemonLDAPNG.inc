@@ -307,7 +307,7 @@ public function doLogin() {
 
     function generateConfig(array $appConfig) {
         $service=array();
-        $llngapp=array('confKey'=> $appConfig['appname'], "exportedVars" => array(), "macros" => array(), "options" => array());
+        $llngapp=array('confKey'=> $appConfig['appname'], "exportedVars" => array(), "macros" => $appConfig['macro'], "options" => array());
         $options_array=array("service","RedirectUris");
 
         // set macros
@@ -370,14 +370,9 @@ public function doLogin() {
 
             // add extraClaim
             $scopeArray=array();
-            
             // move options why ????
             $llngapp['clientId'] = $llngapp['options']['clientID'];
             $llngapp['redirectUris'] = $appConfig['service'];
-
-            //unset($llngapp['options']['clientID']);
-            // FIXME WORTEKS : RedirectUris a 2 endroits ?? BUG????
-            //unset($llngapp['options']['RedirectUris']);
             unset($llngapp['options']['service']);
             // add attribute
             foreach( $appConfig['attributes'] as $key => $value){
@@ -410,9 +405,13 @@ public function doLogin() {
         }
 
         var_dump($llngapp);
+        
         //clean empty values
         //TODO
-             
+        if (!empty($llngapp['macros'])){
+            unset($llngapp['macros']);
+        }
+
         return(json_encode($llngapp));
     }
 
