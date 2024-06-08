@@ -42,7 +42,7 @@ class samlEntity extends simplePlugin
       'plObjectClass' => ['fdAccessIdpSp'],
       'plObjectType'  => ['samlEntity' => [
         'name'        => _('samlEntity'),
-        'icon'        => 'geticon.php?context=applications&icon=federation&size=16',
+        'icon'        => 'geticon.php?context=applications&icon=samlEntity&size=16',
         'ou'          => get_ou('federationRDN'),
         'mainAttr'    => 'cn',
       ]],

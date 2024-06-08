@@ -27,7 +27,7 @@ class accessManagement extends management
       'plShortName'   => _('Access Management'),
       'plTitle'       => _('Access management'),
       'plDescription' => _('Manage Acces Management'),
-      'plIcon'        => 'geticon.php?context=applications&icon=dcim&size=48',
+      'plIcon'        => 'geticon.php?context=applications&icon=access&size=48',
       'plSection'     => 'systems',
       'plPriority'    => 55,
       'plManages'     => ['federation', 'attributes','samlEntity'],

@@ -37,7 +37,7 @@ class accessAttributes extends simplePlugin
       'plObjectClass' => ['fdAccessAttributes'],
       'plObjectType'  => ['attributes' => [
         'name'        => _('attributes'),
-        'icon'        => 'geticon.php?context=applications&icon=federation&size=16',
+        'icon'        => 'geticon.php?context=applications&icon=attributes&size=16',
         'ou'          => get_ou('attributesRDN'),
         'mainAttr'    => 'cn',
       ]],
