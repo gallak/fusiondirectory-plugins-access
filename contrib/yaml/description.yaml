@@ -1,22 +1,26 @@
 information :
-  name : "accessmanagement"
-  description : "plugins which allow to generate accessmanagement / SAML Federation"
+  name : "access"
+  description : "plugin which allow to generate access configuration for webSSO (SAML/OIDC/CAS)"
   version : "0.1"
   authors : ['antoine.gallavardin@free.fr']
   status : "dev"
   screenshotUrl:
-   - https://raw.githubusercontent.com/gallak/fusiondirectory-plugins-accessmanagement/master/example.png
-  logoUrl : https://raw.githubusercontent.com/gallak/fusiondirectory-plugins-accessmanagement/master/html/themes/breezy/icons/48/apps/notes.png
-  tags : ["sso","saml","shibboleh","configuration"]
+   - https://raw.githubusercontent.com/gallak/fusiondirectory-plugins-access/master/contrib/docs/fed-attr-entity.png
+   - https://raw.githubusercontent.com/gallak/fusiondirectory-plugins-access/master/contrib/docs/llng-oidc-app.png
+   - https://raw.githubusercontent.com/gallak/fusiondirectory-plugins-access/master/contrib/docs/llng-oidc-conf.png
+   - https://raw.githubusercontent.com/gallak/fusiondirectory-plugins-access/master/contrib/docs/llng-oidc-scope-content.png
+   - https://raw.githubusercontent.com/gallak/fusiondirectory-plugins-access/master/contrib/docs/push-oidc.png 
+  logoUrl : https://raw.githubusercontent.com/gallak/fusiondirectory-plugins-access/master/html/themes/breezy/icons/48/apps/access.png
+  tags : ["sso","saml","shibboleh","configuration","access","lemonldap"]
   license : "GPLv2"
   origin : "source"
 
 support :
   provider : "community"
-  homeUrl : "https://github.com/gallak/fusiondirectory-plugins-accessmanagement"
-  ticketUrl : "https://github.com/gallak/fusiondirectory-plugins-accessmanagement/issues"
-  discussionUrl : "https://github.com/gallak/fusiondirectory-plugins-accessmanagement/wiki"
-  downloadUrl: "https://github.com/gallak/fusiondirectory-plugins-accessmanagement/archive/refs/heads/master.zip"
+  homeUrl : "https://github.com/gallak/fusiondirectory-plugins-access"
+  ticketUrl : "https://github.com/gallak/fusiondirectory-plugins-access/issues"
+  discussionUrl : "https://github.com/gallak/fusiondirectory-plugins-access/wiki"
+  downloadUrl: "https://github.com/gallak/fusiondirectory-plugins-access/archive/refs/heads/master.zip"
   schemaUrl : "https://schemas.fusiondirectory.info/"
 
 requirement:
@@ -25,6 +29,31 @@ requirement:
 
 content :
   fileList :
+  - './admin/systems/services/access/class_serviceAccess.inc'
+  - './admin/systems/class_accessServerSelectAttribute.inc'
+  - './admin/systems/access/class_accessAttributes.inc'
+  - './admin/systems/access/class_samlEntity.inc'
+  - './admin/systems/access/class_accessApplication.inc'
+  - './admin/systems/access/methods/class_LemonLDAPNG.inc'
+  - './admin/systems/access/methods/class_accessMethodKeyCloak.inc'
+  - './admin/systems/access/methods/class_accessMethodLemonLDAPNG.inc'
+  - './admin/systems/access/class_access.inc'
+  - './admin/systems/access/class_federation.inc'
+  - './admin/systems/access/accessApplication.tpl'
+  - './html/themes/breezy/icons/48/apps/attributes.png'
+  - './html/themes/breezy/icons/48/apps/access.png'
+  - './html/themes/breezy/icons/16/apps/samlEntity.png'
+  - './html/themes/breezy/icons/16/apps/attributes.png'
+  - './html/themes/breezy/icons/16/apps/federation.png'
   - './locale/fr/fusiondirectory.po'
   - './locale/en/fusiondirectory.po'
   - './contrib/yaml/description.yaml'
+  - './contrib/openldap/access-fd.schema'
+  - './contrib/openldap/access-fd-conf.schema'
+  - './contrib/docs/llng-oidc-scope-content.bmp'
+  - './contrib/docs/push-oidc.png'
+  - './contrib/docs/fed-attr-entity.png'
+  - './contrib/docs/llng-oidc-conf.png'
+  - './contrib/docs/access.png'
+  - './contrib/docs/llng-oidc-app.png'
+  - './config/access/class_accessConfig.inc'
