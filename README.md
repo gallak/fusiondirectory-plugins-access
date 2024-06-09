@@ -24,12 +24,12 @@ This plugin need the restclient.php support and xml support for php.
 
 ### Access to the "Access" place
  
-![Access to the access place](./docs/contrib/access.png)
+![Access to the access place](./contrib/docs/access.png)
 ### Place where defining
   - SAML Federation  with the url of metadata. When all metadata are loaded, all SAML Entitu ID are imported
   - Attributes used by the "Access" system with the current name , the friendly Name, the OID and a small description
 
-![Access to the access place](./docs/contrib/fed-attr-entity.png)
+![Access to the access place](./contrib/docs/fed-attr-entity.png)
 
 ### Web access configuration
 
@@ -55,12 +55,12 @@ Actually , 3 buttons exists
  
  #### when pushing configuration
  
-![Push configuration](./docs/contrib/push-oidc.png)
+![Push configuration](./contrib/docs/push-oidc.png)
  
  #### Result on LemonLDAP::NG
  
-![App definition](./docs/contrib/llng-oidc-conf.png)
-![Attribute definition](./docs/contrib/llng-oidc-app.png)
+![App definition](./contrib/docs/llng-oidc-conf.png)
+![Attribute definition](./contrib/docs/llng-oidc-app.png)
 
 
 ## Todo
