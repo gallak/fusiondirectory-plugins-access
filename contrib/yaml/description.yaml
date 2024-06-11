@@ -11,7 +11,7 @@ information :
    - https://raw.githubusercontent.com/gallak/fusiondirectory-plugins-access/master/contrib/docs/llng-oidc-scope-content.png
    - https://raw.githubusercontent.com/gallak/fusiondirectory-plugins-access/master/contrib/docs/push-oidc.png 
   logoUrl : https://raw.githubusercontent.com/gallak/fusiondirectory-plugins-access/master/html/themes/breezy/icons/48/apps/access.png
-  tags : ["sso","saml","shibboleh","configuration","access","lemonldap"]
+  tags : ["administration","automation","sso","saml","shibboleh","server","access","lemonldap"]
   license : "GPLv2"
   origin : "source"
 

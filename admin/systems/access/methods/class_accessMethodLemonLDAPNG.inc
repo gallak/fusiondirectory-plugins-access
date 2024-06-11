@@ -404,7 +404,7 @@ public function doLogin() {
         
         }
 
-        var_dump($llngapp);
+        //var_dump($llngapp);
         
         //clean empty values
         //TODO
