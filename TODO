@@ -1,0 +1,23 @@
+Gestion du SSO
+
+conf serveur 
+  -> endpoitn LemonLDPA avec entete de securite : URL
+  -> protocole ( droplist ) : CAS / OID C/SAML / HEADERS
+  -> affiche panneau  / checkbox
+    -> liste des sections
+  -> liste de attribut desservi [ liste avec champs ]
+  -> liste 
+
+
+
+
+conf client
+  -> serveur LLNG de rattachement ( droplist)
+  -> type CAS/OIDC/SAML/HEADERS ( droplist ) 
+  -> Formuaire dédiés par protocole  [ stockag clé-> valeurs]
+  -> propriétaire
+
+métier
+ajouter et supprime
+
+
