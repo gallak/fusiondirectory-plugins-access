@@ -189,6 +189,9 @@ class accessWebApplication extends simplePlugin
           new SelectAttribute(
             _('Authentification Type'), _('Type of Authentification'),
              'fdAccessApplicationAuthType', TRUE,['OIDC','SAML','CAS','HEADER'],'',['OIDC','SAML','CAS','HEADER']),
+          new SelectAttribute(
+              _('type'), _('Type'),
+              'fdAccessEntityType', TRUE,["IDP","SP"],"IDP",["IDP","SP"]),
           new accessServerSelectAttribute(
               _('Authentification server'), _('Authentification server'),
               'fdAccessApplicationAuthServerDn'
