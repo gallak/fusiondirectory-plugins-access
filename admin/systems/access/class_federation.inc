@@ -20,72 +20,137 @@
  */
 
 
- class federationEntities {
-
+ /* federation entities are web application defined inside SAML federation as SP : Service Provider or IDP Identity Provider
+  those applications are fecth from SAML Federation and import as webApplication object with Acces tab */
+class federationEntities {
+ 
   public $xml;
   public $entity;
-  
+   
   function __construct($url) {
     $str = file_get_contents($url);
-
     $this->xml=simplexml_load_string($str) or die("Error: Cannot create object");
     $this->xml->registerXPathNamespace('md',"urn:oasis:names:tc:SAML:2.0:metadata");
     $this->xml->registerXPathNamespace('mdrpi',"urn:oasis:names:tc:SAML:metadata:rpi");
   }
-
+ 
   function getOrgName(){
     return($this->entity->children("md",true)->Organization->OrganizationName->__toString());
   }
-
+ 
   function getEntityID(){
     return($this->entity->attributes()['entityID']->__toString());
   }
-
+ 
   function getRegistrationAuthority(){
     return($this->entity->children("md",true)->Extensions->children("mdrpi",true)->attributes()["registrationAuthority"]->__toString());
   }
-
+ 
   function getOrgContactTechnical(){
     return($this->entity->children("md",true)->ContactPerson->EmailAddress->__toString());
   }
-
+ 
   function getSAMLType(){
     if ( ! empty($this->entity->children("md",true)->SPSSODescriptor)) {
-            return("SP");
+      return("SP");
     }elseif (! empty($this->entity->children("md",true)->IDPSSODescriptor)) {
-            return("IDP");
+      return("IDP");
     }else{
-            return("N/A");
+      return("N/A");
     }
   }
-
+ 
   function getMetadata(){
     return($this->entity->asXML());
   }
+ 
+  function getUrlService(){
+    if ($this->getSAMLType() == "SP" ){
+       $location=$this->entity->children("md",true)->SPSSODescriptor->Extensions->children("mdui",true)->UIInfo->InformationURL->__toString();
+     }else{
+       $location=$this->entity->children("md",true)->IDPSSODescriptor->SingleSignOnService->attributes()->{'Location'}->__toString();
+     }
+    return($location);
+  }
+ 
+  function getTitle(){
+    if ($this->getSAMLType() == "SP" ){
+      $title=$this->entity->children("md",true)->SPSSODescriptor->Extensions->children("mdui",true)->UIInfo->DisplayName->__toString();
+     }else{
+      $title=$this->entity->children("md",true)->IDPSSODescriptor->Extensions->children("mdui",true)->UIInfo->DisplayName->__toString();
+    }
+    return($title);
+  }
+ 
+ 
+  function getDescription(){
+    if ($this->getSAMLType() == "SP" ){
+      $desc=$this->entity->children("md",true)->SPSSODescriptor->Extensions->children("mdui",true)->UIInfo->Description->__toString();
+    }else{
+      $desc=$this->entity->children("md",true)->IDPSSODescriptor->Extensions->children("mdui",true)->UIInfo->Description->__toString();
+     }
+    return($desc);
+  }
+ 
+ 
+ 
+ 
+  function getAttributes(){
+    $attrArray=array();
+    if ($this->getSAMLType() == "SP" ){
+      if ( ! empty($this->entity->children("md",true)->SPSSODescriptor->AttributeConsumingService)){
+        foreach ($this->entity->children("md",true)->SPSSODescriptor->AttributeConsumingService->RequestedAttribute as  $attr){
+          if (! empty($attr->attributes()->{'isRequired'})){
+            $mandatory=$attr->attributes()->{'isRequired'}->__toString();
+          }else{
+            $mandatory="false";
+          }
+        //$attrArray[]=array("FriendlyName" => $attr->attributes()->{'FriendlyName'}->__toString(),"isRequired" => $mandatory);
 
+        $attrArray[]=$attr->attributes()->{'FriendlyName'}->__toString().";".$mandatory.";;";
 
+        }
+      }
+    }
+    return($attrArray);
+  }
+ 
   function getAllEntities(){
     $arrayEntities=array();
     foreach ($this->xml->xpath("//md:EntityDescriptor") as $entity ) {
-	$this->entity = $entity;
-      $arrayEntities[$this->getEntityID()]=array(
-        'fdAccessEntityAuthority' => $this->getRegistrationAuthority(),
-        'fdAccessEntityType' => $this->getSAMLType(),
-        'o' => $this->getOrgName(),
-        'mail' => $this->getOrgContactTechnical(),
-        'cn' => $this->getEntityID()
-        //'metadata' => $this->getMetadata()
-      );
+      $this->entity = $entity;
+        
+        $attrObj=array(
+          'objectClass' => array("fdWebApplication","fdAccessApplication"),
+          'fdAccessEntityAuthority' => $this->getRegistrationAuthority(),
+          'fdAccessEntityType' => $this->getSAMLType(),
+           'o' => $this->getOrgName(),
+           'mail' => $this->getOrgContactTechnical(),
+           'cn' => $this->getEntityID(),
+           'fdAccessApplicationSAMLMetadataFile' => $this->getMetadata(),
+           'labeledURI' => $this->getUrlService(),
+           'fdApplicationTitle' => $this->getTitle(),
+           'fdAccessApplicationAuthType' => "SAML",
+           'fdAccessApplicationAuthServerDn' => "",
+           'description' => $this->getDescription(),
+           'fdAccessApplicationService' => $this->getUrlService(),
+          );
+
+          $samlAttr=$this->getAttributes();
+          if (! empty($samlAttr)){
+            $attrObj['fdAccessApplicationAttributes'] = $samlAttr;
+          }
+        $arrayEntities[$this->getEntityID()]=$attrObj;
     }
     return($arrayEntities);
   }
-
+ 
   function getOneEntitie($entity){
-    return([$entity => $this->getAllEntities()[$entity]]);
+     return([$entity => $this->getAllEntities()[$entity]]);
   }
-
+ 
 }
-
+ 
 
 
 
@@ -129,17 +194,23 @@ class federation extends simplePlugin
 
     $ldap = $config->get_ldap_link();
 
-    $entitiesList = new federationEntities($this->fdFederationURL);
+    //$entitiesList = new federationEntities($this->fdFederationURL);
+    $entitiesList = new federationEntities("/var/www/html/main-all-renater-metadata.xml");
     $allInfos=$entitiesList->getAllEntities();
     
     foreach( $allInfos as $entity => $content){
-      $dn = 'cn='.ldap_escape_dn($entity).','.$config->current['BASE'];
-      $ldap->cd($dn);
-      $attrs = array_merge(['objectClass' => 'fdAccessIdpSp'], $content);
-      $ldap->add($attrs);
-      if (!$ldap->success()) {
-        $error = new SimplePluginLdapError($this, $dn, LDAP_ADD, $ldap->get_error(), $ldap->get_errno());
-        $error->display();
+      if ( $entity == "https://apps.univ-lr.fr/idp/shibboleth" || $entity == "https://archive.espe-nice-toulon.fr" ){
+        var_dump($content);
+        var_dump($config->get_cfg_value('WebappsRDN'));
+        $dn = 'cn='.ldap_escape_dn($entity).','.$config->get_cfg_value('WebappsRDN').','.$config->current['BASE'];
+        $ldap->cd($dn);
+       // $attrs = array_merge(['objectClass' => 'fdAccessIdpSp'], $content);
+        $ldap->add($content);
+        if (!$ldap->success()) {
+          $error = new SimplePluginLdapError($this, $dn, LDAP_ADD, $ldap->get_error(), $ldap->get_errno());
+          $error->display();
+        }
+
       }
     }
   }

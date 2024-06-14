@@ -30,7 +30,7 @@ class accessManagement extends management
       'plIcon'        => 'geticon.php?context=applications&icon=access&size=48',
       'plSection'     => 'systems',
       'plPriority'    => 55,
-      'plManages'     => ['federation', 'attributes','samlEntity'],
+      'plManages'     => ['federation', 'attributes','samlEntity','webApplication'],
     ];
   }
 }
