@@ -343,18 +343,10 @@ class accessWebApplication extends simplePlugin
   }
 
 
- /* public function render (): string
-  {
-    $smarty = get_smarty();
-    $smarty->assign('fdAccessApplicationAuthType',$this->fdAccessApplicationAuthType);
-    return parent::render();
-  }*/
 
   public function typeChanged(){
     $this->fdAccessApplicationAuthType=$this->attributesAccess['fdAccessApplicationAuthType']->getValue();
-    //$this->fdAccessApplicationScopeRules=$this->attributesAccess['fdAccessApplicationScopeRules']->getValue();
-
-    
+       
     if ($this->fdAccessApplicationAuthType == "SAML" ){
       $this->attributesAccess['fdAccessApplicationSAMLMetadataFile']->setVisible(TRUE);
       $this->attributesAccess['fdAccessEntityAuthority']->setVisible(TRUE);
@@ -450,7 +442,10 @@ class accessWebApplication extends simplePlugin
   {
     parent::prepare_remove();
     /* Remove tagged values as well */
-    $this->deleteconfig();
+    if ( ! empty($this->fdAccessApplicationAuthServerDn)){
+      $this->deleteconfig();
+    }
+    
   }
 
 

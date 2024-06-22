@@ -33,6 +33,10 @@ class federationEntities {
     $this->xml->registerXPathNamespace('md',"urn:oasis:names:tc:SAML:2.0:metadata");
     $this->xml->registerXPathNamespace('mdrpi',"urn:oasis:names:tc:SAML:metadata:rpi");
   }
+
+  function getMetadataAuthority(){
+    return($this->xml->attributes()['Name']->__toString());
+  }
  
   function getOrgName(){
     return($this->entity->children("md",true)->Organization->OrganizationName->__toString());
@@ -105,7 +109,6 @@ class federationEntities {
           }else{
             $mandatory="false";
           }
-        //$attrArray[]=array("FriendlyName" => $attr->attributes()->{'FriendlyName'}->__toString(),"isRequired" => $mandatory);
 
         $attrArray[]=$attr->attributes()->{'FriendlyName'}->__toString().";".$mandatory.";;";
 
@@ -113,6 +116,16 @@ class federationEntities {
       }
     }
     return($attrArray);
+  }
+
+
+  function createNameService($entityId){
+  
+    $entityUrlArray=parse_url($entityId);
+    $entityUrlHost=str_replace(".","-",$entityUrlArray['host']);
+    $entityUrlPath=str_replace("/","-",$entityUrlArray['path']);
+    return($entityUrlHost.$entityUrlPath);
+
   }
  
   function getAllEntities(){
@@ -126,7 +139,7 @@ class federationEntities {
           'fdAccessEntityType' => $this->getSAMLType(),
            'o' => $this->getOrgName(),
            'mail' => $this->getOrgContactTechnical(),
-           'cn' => $this->getEntityID(),
+           'cn' => $this->createNameService($this->getEntityID()),
            'fdAccessApplicationSAMLMetadataFile' => $this->getMetadata(),
            'labeledURI' => $this->getUrlService(),
            'fdApplicationTitle' => $this->getTitle(),
@@ -171,6 +184,18 @@ class federation extends simplePlugin
   }
 
 
+  static function cleanAllEntities($federationURL){
+    global $config;
+    $ldap = $config->get_ldap_link();
+    $entities_dn=$config->get_cfg_value('WebappsRDN').','.$config->current['BASE'];
+    $ldap->cd($entities_dn);
+    $ldap->search('(&(objectClass=fdAccessApplication)(fdAccessEntityAuthority='.$federationURL.'))', ['dn']);
+    while ($rec = $ldap->fetch()) {
+      $ldap->rmdir($rec['dn']);
+    }
+  }
+
+
   static function plInfo (): array
   {
     return [
@@ -193,24 +218,21 @@ class federation extends simplePlugin
     global $config;
 
     $ldap = $config->get_ldap_link();
-
-    //$entitiesList = new federationEntities($this->fdFederationURL);
-    $entitiesList = new federationEntities("/var/www/html/main-all-renater-metadata.xml");
-    $allInfos=$entitiesList->getAllEntities();
-    
-    foreach( $allInfos as $entity => $content){
+    $federationObject = new federationEntities("/var/www/html/main-all-renater-metadata.xml");
+    //  clean all local entities
+    $this->cleanAllEntities($federationObject->getMetadataAuthority());
+    // fetch all remote entities
+    $allEntitiesInfos=$federationObject->getAllEntities();
+    // insert into ldap
+    foreach( $allEntitiesInfos as $entity => $content){
       if ( $entity == "https://apps.univ-lr.fr/idp/shibboleth" || $entity == "https://archive.espe-nice-toulon.fr" ){
-        var_dump($content);
-        var_dump($config->get_cfg_value('WebappsRDN'));
-        $dn = 'cn='.ldap_escape_dn($entity).','.$config->get_cfg_value('WebappsRDN').','.$config->current['BASE'];
+        $dn = 'cn='.$content['cn'].','.$config->get_cfg_value('WebappsRDN').','.$config->current['BASE'];
         $ldap->cd($dn);
-       // $attrs = array_merge(['objectClass' => 'fdAccessIdpSp'], $content);
         $ldap->add($content);
         if (!$ldap->success()) {
           $error = new SimplePluginLdapError($this, $dn, LDAP_ADD, $ldap->get_error(), $ldap->get_errno());
           $error->display();
         }
-
       }
     }
   }
