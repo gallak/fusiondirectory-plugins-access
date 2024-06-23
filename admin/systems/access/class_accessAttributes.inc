@@ -38,7 +38,7 @@ class accessAttributes extends simplePlugin
       'plObjectType'  => ['attributes' => [
         'name'        => _('attributes'),
         'icon'        => 'geticon.php?context=applications&icon=attributes&size=16',
-        'ou'          => get_ou('attributesRDN'),
+        'ou'          => get_ou('AccessAttributesRDN'),
         'mainAttr'    => 'cn',
       ]],
       'plSearchAttrs'  => ['description'],
@@ -77,4 +77,10 @@ class accessAttributes extends simplePlugin
     parent::__construct($dn, $object, $parent, $mainTab);
   }
 
+
+  function compute_dn (): string
+  {
+    global $config;
+    return ("cn=".$this->cn.",".get_ou('AccessAttributesRDN').$config->current['BASE']);
+  }
 }
