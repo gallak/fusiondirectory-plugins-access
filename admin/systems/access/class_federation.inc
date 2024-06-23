@@ -205,7 +205,7 @@ class federation extends simplePlugin
       'plObjectType'  => ['federation' => [
         'name'        => _('federation'),
         'icon'        => 'geticon.php?context=applications&icon=federation&size=16',
-        'ou'          => get_ou('federationRDN'),
+        'ou'          => get_ou('AccessFederationRDN'),
         'mainAttr'    => 'cn',
       ]],
       'plSearchAttrs'  => ['description'],
@@ -218,7 +218,7 @@ class federation extends simplePlugin
     global $config;
 
     $ldap = $config->get_ldap_link();
-    $federationObject = new federationEntities("/var/www/html/main-all-renater-metadata.xml");
+    $federationObject = new federationEntities($this->fdFederationURL);
     //  clean all local entities
     $this->cleanAllEntities($federationObject->getMetadataAuthority());
     // fetch all remote entities
@@ -275,9 +275,18 @@ class federation extends simplePlugin
   {
     global $config;
     parent::__construct($dn, $object, $parent, $mainTab);
-    //$smarty = get_smarty();
     $this->fdFederationContentn=$this->getFederationContent();
 
   }
+
+
+
+
+  function compute_dn (): string
+  {
+    global $config;
+    return ("cn=".$this->cn.",".get_ou('AccessFederationRDN').$config->current['BASE']);
+  }
+
 
 }
