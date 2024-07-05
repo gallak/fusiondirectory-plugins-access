@@ -52,9 +52,12 @@ class accessWebApplication extends simplePlugin
     $this->remoteAccessHandle->setConfig(array("base_url" => $attrs['fdAccessServiceURL'][0],"username" => $attrs['fdAccessServiceUser'][0], "password" => $attrs['fdAccessServicePassword'][0]));
   }
 
+  #FIXME : add Federation rattachement when import config 
+  #FIXME : add description filed with date and author
+
   function pushconfig(){
     $this->createAccessConnection();
-    $jsonAppData = $this->remoteAccessHandle->generateConfig($this->generateAppData());
+    $jsonAppData = $this->remoteAccessHandle->generateConfig($this->generateAppData()); 
     $this->remoteAccessHandle->updateApplication($this->fdAccessApplicationAuthType, $jsonAppData);
   }
 
@@ -153,18 +156,26 @@ class accessWebApplication extends simplePlugin
       $application['type']=$this->fdAccessApplicationAuthType;
       // fetch macros
 
-      $application['macros'] = $this->fdAccessApplicationMacros;
-      $application['options'] = $this->fdAccessApplicationSettings;
-
+      if ( ! empty($this->fdAccessApplicationMacros)){
+        $application['macros'] = $this->fdAccessApplicationMacros;
+      }
+      if (! empty($this->fdAccessApplicationSettings)){
+        $application['options'] = $this->fdAccessApplicationSettings;
+      }
+      
+      
       if ( isset($this->fdAccessApplicationSAMLMetadataFile)){
         $application['metadata'] = $this->fdAccessApplicationSAMLMetadataFile;
+      }
+      if ( isset($this->fdAccessEntityAuthority)){
+        $application['authority'] = $this->fdAccessEntityAuthority;
+
       }
       if ( isset($this->fdAccessApplicationScopeRules)){
         $application['scopeRules'] = $this->fdAccessApplicationScopeRules;
       }
       // add service URI
       $application['service']=$this->fdAccessApplicationService;
-      
 
       return($application);
 
@@ -174,6 +185,8 @@ class accessWebApplication extends simplePlugin
   }
 
 
+
+  #FIXE les OU de depart pour les entites de renater et teste la copie vers une autre ou !
 
 
 
@@ -193,8 +206,8 @@ class accessWebApplication extends simplePlugin
               _('type'), _('Type'),
               'fdAccessEntityType', TRUE,["IDP","SP"],"IDP",["IDP","SP"]),
           new StringAttribute(
-              _('Federation'), _('Url of Federation'),
-              'fdAccessEntityAuthority', TRUE),
+              _('Federation'), _('Url of Federation if SP has been imported from a SAML Federation'),
+              'fdAccessEntityAuthority', FALSE),
           new accessServerSelectAttribute(
               _('Authentification server'), _('Authentification server'),
               'fdAccessApplicationAuthServerDn'
@@ -349,7 +362,7 @@ class accessWebApplication extends simplePlugin
        
     if ($this->fdAccessApplicationAuthType == "SAML" ){
       $this->attributesAccess['fdAccessApplicationSAMLMetadataFile']->setVisible(TRUE);
-      $this->attributesAccess['fdAccessEntityAuthority']->setVisible(TRUE);
+//      $this->attributesAccess['fdAccessEntityAuthority']->setVisible(TRUE);
       $this->attributesAccess['o']->setVisible(TRUE);
       $this->attributesAccess['mail']->setVisible(TRUE);
       $this->attributesAccess['fdAccessApplicationService']->setVisible(FALSE);

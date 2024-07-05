@@ -137,41 +137,7 @@ public function doLogin() {
     public function getMethodName(): string{
         return($this->name);
     }
-    /*
 
-    $cnxInfo = array("base_url" => $this->fdAccessServiceURL,"username" => $this->fdAccessServiceUser, "password" => $this->fdAccessServicePassword);
-    $cnx->connect($cnxInfo);
-    var_dump($cnx->checkStatus());*/
-
-    /* connect to serveur */
-    /*
-    function connect(array $param) {
-                $handle->setCnx($conf);
-        return($handle->checkStatus());
-
-            $options= array( "username" => $param("username", "password" => $param("password"), 'base_url' => $param("base_url");
-            $param = array();
-            $headers = array('Accept' => 'application/json');
-            $this->handle = new RestClient($options);
-          }
-        
-
-
-
-
-
-
-
-        $headers = array('Accept' => 'application/json');
-        $apiClient = new RestClient($options);
-        $result = $apiClient->post('/login',$param,$headers);
-        if ( $result->info->http_code == "200" ){
-            $this->server_token = $result->decode_response()->api_key;
-        }else{
-            print( "Error while getting token" );
-        }
-        print_r("Connect application\n");
-    }*/
     function setConfig($conf) {
         $this->serviceConfig=$conf;
     }
@@ -306,9 +272,12 @@ public function doLogin() {
     }
 
     function generateConfig(array $appConfig) {
+        
         $service=array();
-        $llngapp=array('confKey'=> $appConfig['appname'], "exportedVars" => array(), "macros" => $appConfig['macro'], "options" => array());
+        // bug exportVars for cas and OIDC axportedAttributes for saml put it in dedicated portion code
+        $llngapp=array('confKey'=> $appConfig['appname'], "macros" => $appConfig['macro'], "options" => array());
         $options_array=array("service","RedirectUris");
+        $optionnal_config_keys=array("macros", "options");
 
         // set macros
         foreach($appConfig['macros'] as $macro_infos) {
@@ -337,6 +306,7 @@ public function doLogin() {
 
         // configuration manipulation for CAS method        
         if ( $appConfig['type']== "CAS"){
+            $llng['exportedVars']=array();
             // set Service URI
             $llngapp['options']['service']=$appConfig['service'];
             // set attributes
@@ -348,26 +318,33 @@ public function doLogin() {
         }
         // configuration manipulation for SAML method
         if ( $appConfig['type']== "SAML"){
+            
+            $llng['exportedAttributes']=array();
             // set attributes
             foreach( $appConfig['attributes'] as $key => $value){
-                $llngapp['exportedVars'][$key]['friendlyName']=$value['friendlyName'];
-                $llngapp['exportedVars'][$key]['mandatory']=$value['mandatory'];
-                $llngapp['exportedVars'][$key]['name']=$value['name'];
+                $llngapp['exportedAttributes'][$key]['friendlyName']=$value['friendlyName'];
+                $llngapp['exportedAttributes'][$key]['mandatory']=$value['mandatory'];
+                $llngapp['exportedAttributes'][$key]['name']=$value['name'];
                 
                 if ( $value['format'] == "URI" ){
-                    $llngapp['exportedVars'][$key]['format']="urn:oasis:names:tc:SAML:2.0:attrname-format:uri";    
+                    $llngapp['exportedAttributes'][$key]['format']="urn:oasis:names:tc:SAML:2.0:attrname-format:uri";    
                 }
 
             }
 
             //set metadata
-            $llngapp['metadata']=$appConfig['metadata'];
+            if (isset($appConfig['metadata'])){
+                $llngapp['metadata']=$appConfig['metadata'];
+            }
+            if ($appConfig['authority']){
+                $llngapp['options']['FederationEntityID']=$appConfig['authority'];
+            }
                
         }
 
         // configuration manipulation for OIDC method        
         if ( $appConfig['type']== "OIDC"){
-
+            $llng['exportedVars']=array();
             // add extraClaim
             $scopeArray=array();
             // move options why ????
@@ -407,11 +384,11 @@ public function doLogin() {
         //var_dump($llngapp);
         
         //clean empty values
-        //TODO
-        if (!empty($llngapp['macros'])){
-            unset($llngapp['macros']);
+        foreach($optionnal_config_keys as $opt){
+            if ( count($llngapp[$opt]) == 0 ){
+                unset($llngapp[$opt]);
+            }    
         }
-
         return(json_encode($llngapp));
     }
 

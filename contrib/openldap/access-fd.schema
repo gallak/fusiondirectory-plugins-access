@@ -126,7 +126,15 @@ attributetype ( 1.3.6.1.4.1.38414.142.5.13 NAME 'fdAccessApplicationService'
         SYNTAX 1.3.6.1.4.1.1466.115.121.1.40 
         )
 
+attributetype ( 1.3.6.1.4.1.38414.142.5.14 NAME 'fdAccessFederationOptionalAttribute'
+        DESC 'FusionDirectory - Federation optional Attributes policie'
+        SYNTAX 1.3.6.1.4.1.1466.115.121.1.40 
+        )
 
+attributetype ( 1.3.6.1.4.1.38414.142.5.15 NAME 'fdAccessFederationMandatoryAttribute'
+        DESC 'FusionDirectory - Federation mandatory Attributes policie'
+        SYNTAX 1.3.6.1.4.1.1466.115.121.1.40 
+        )
 
 # Object Class
 objectclass (1.3.6.1.4.1.38414.142.6.1 NAME 'fdAccessAttributes'
@@ -151,7 +159,7 @@ objectclass (1.3.6.1.4.1.38414.142.4.2 NAME 'fdAccessApplication'
 objectclass (1.3.6.1.4.1.38414.142.4.3 NAME 'fdAccessFederation'
         DESC 'FusionDirectory - Federation Declaration'
         MUST (cn $ fdFederationURL )
-        MAY (description))
+        MAY (description $ fdAccessFederationMandatoryAttribute $ fdAccessFederationOptionalAttribute $ fdAccessApplicationAuthServerDn))
 
 
 
