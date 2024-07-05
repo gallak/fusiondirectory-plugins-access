@@ -38,6 +38,7 @@ class federationEntities {
     return($this->xml->attributes()['Name']->__toString());
   }
  
+
   function getOrgName(){
     return($this->entity->children("md",true)->Organization->OrganizationName->__toString());
   }
@@ -51,8 +52,27 @@ class federationEntities {
   }
  
   function getOrgContactTechnical(){
-    return($this->entity->children("md",true)->ContactPerson->EmailAddress->__toString());
+    $contact=$this->entity->children("md",true)->ContactPerson->EmailAddress->__toString();
+    return(preg_split("/:/",$contact)[1]);
   }
+
+  function getIDPLogo(){
+    return($this->entity->children("md",true)->IDPSSODescriptor->Extensions->children("mdui",true)->UIInfo->Logo->__toString());
+  }
+
+  function getIDPDisplayName(){
+    return($this->entity->children("md",true)->IDPSSODescriptor->Extensions->children("mdui",true)->UIInfo->DisplayName->__toString());
+  }
+
+  function getIDPDescription(){
+    return($this->entity->children("md",true)->IDPSSODescriptor->Extensions->children("mdui",true)->UIInfo->Description->__toString());
+  }
+
+  function getOrganizationURL(){
+    return($this->entity->children("md",true)->Organization->OrganizationURL->__toString());
+  }
+
+
  
   function getSAMLType(){
     if ( ! empty($this->entity->children("md",true)->SPSSODescriptor)) {
@@ -100,6 +120,10 @@ class federationEntities {
  
  
   function getAttributes(){
+
+    global $config;
+    $ldap = $config->get_ldap_link();
+
     $attrArray=array();
     if ($this->getSAMLType() == "SP" ){
       if ( ! empty($this->entity->children("md",true)->SPSSODescriptor->AttributeConsumingService)){
@@ -109,8 +133,26 @@ class federationEntities {
           }else{
             $mandatory="false";
           }
+        
 
-        $attrArray[]=$attr->attributes()->{'FriendlyName'}->__toString().";".$mandatory.";;";
+
+          $attr_cn=$attr->attributes()->{'FriendlyName'}->__toString();
+          $attr_ou=get_ou('AccessAttributesRDN').$config->current['BASE'];
+          //$entities_dn=$config->get_cfg_value('WebappsRDN').','.$config->current['BASE'];
+          $ldap->cd($attr_ou);
+          $ldap->search('(&(objectClass=fdAccessAttributes)(cn='.$attr_cn.'))', ['dn']);
+          $attr_dn=$ldap->fetch()["dn"];
+
+          if ( $attr_dn != null){
+            $attrArray[]=$attr_dn.";".$mandatory.";;";
+            
+          }
+/*          FIXME : log in debug system
+            else{
+            $error = new FusionDirectoryError(htmlescape(sprintf(_('Error :"%s" is not declared on FusionDirectary Acces systems. Its necessary for %s '), $attr_cn, $this->entity->attributes()['entityID']->__toString())));
+            $error->display();
+  
+          }*/
 
         }
       }
@@ -153,8 +195,16 @@ class federationEntities {
           if (! empty($samlAttr)){
             $attrObj['fdAccessApplicationAttributes'] = $samlAttr;
           }
+          // add specificOpotion
+//          $attrObj["fdAccessApplicationSettings"]= array(
+//            "samlSPMetaDataOptionsFederationEntityID;".$this->getRegistrationAuthority(),
+//          );
         $arrayEntities[$this->getEntityID()]=$attrObj;
+        
+
+    
     }
+
     return($arrayEntities);
   }
  
@@ -176,7 +226,7 @@ class federation extends simplePlugin
 
   protected $displayHeader  = TRUE;
   protected $loaded = FALSE;
-
+  private $remoteAccessHandle;
 
   static function getFederationContent (): array 
   {
@@ -225,6 +275,7 @@ class federation extends simplePlugin
     $allEntitiesInfos=$federationObject->getAllEntities();
     // insert into ldap
     foreach( $allEntitiesInfos as $entity => $content){
+      // condition pour  les tests a enlever !!
       if ( $entity == "https://apps.univ-lr.fr/idp/shibboleth" || $entity == "https://archive.espe-nice-toulon.fr" ){
         $dn = 'cn='.$content['cn'].','.$config->get_cfg_value('WebappsRDN').','.$config->current['BASE'];
         $ldap->cd($dn);
@@ -238,6 +289,54 @@ class federation extends simplePlugin
   }
 
 
+  private function createAccessConnection(){
+    global $config;
+    $ldap = $config->get_ldap_link();
+    $ldap->cd($this->fdAccessApplicationAuthServerDn);
+    $ldap->search('(objectClass=fdAccessService)', ['fdAccessServiceType','fdAccessServiceURL','fdAccessServiceUser','fdAccessServicePassword']);
+    $attrs = $ldap->fetch();
+    $serviceClass="accessMethod".$attrs['fdAccessServiceType'][0];
+    $this->remoteAccessHandle = new $serviceClass;
+    $this->remoteAccessHandle->setConfig(array("base_url" => $attrs['fdAccessServiceURL'][0],"username" => $attrs['fdAccessServiceUser'][0], "password" => $attrs['fdAccessServicePassword'][0]));
+  }
+
+  function generateAppData(){
+    global $config;
+    $ldap = $config->get_ldap_link();
+
+    $application=array();
+
+    //fetch app name
+    $application['appname']=$this->parent->getBaseObject()->cn;
+    $application['type']="SAML";
+    $application['options']=array();
+
+    $application['options'][]="FederationRequiredAttributes;".$this->fdAccessFederationMandatoryAttribute;
+    $application['options'][]="FederationOptionalAttributes;".$this->fdAccessFederationOptionalAttribute;
+    $application['options'][]="FederationEntityID;"."https://federation.id.fr";
+    $application['macros']=array();
+    #BUG ?? metadaare mandatory but Federation didn't have metadata
+    return($application);
+
+
+
+
+}
+
+
+
+
+  function pushconfig(){
+    $this->createAccessConnection();
+    $appData=$this->generateAppData();
+    //var_dump($appData['type']);
+    $jsonAppData = $this->remoteAccessHandle->generateConfig($appData); 
+    var_dump($jsonAppData);
+    $this->remoteAccessHandle->updateApplication($appData['type'], $jsonAppData);
+  }
+
+  //FIXME : add button to push federation declration insode LEMONLDAP
+
 
 
   static function getAttributesInfo (): array
@@ -247,7 +346,7 @@ class federation extends simplePlugin
         'name'  => _('Information'),
         'attrs' => [
                 new StringAttribute(
-                  _('Name'), _('Name of Fedration'),
+                  _('Name'), _('Name of Federation'),
                   'cn', TRUE),
                 new StringAttribute(
                   _('Metadata URL'), _('Url of Metadata'),
@@ -258,16 +357,35 @@ class federation extends simplePlugin
                 new ButtonAttribute(_('Refresh Metadata'), _('Refresh Metadata'),
                   'fdFederationUpdateButton', _('Refresh'),'refreshMD'
                   ),
-        ]
+        ],
       ],
+      'Settings Federation' => [
+        'name'  => _('Settings Federation'),
+        'attrs' => [
+          new accessServerSelectAttribute(
+            _('Authentification server'), _('Authentification server'),
+            'fdAccessApplicationAuthServerDn'
+            ),
+          new SelectAttribute(
+              _('Mandatory Attribute'), _('Mandatory Attribute Policie'),
+              'fdAccessFederationMandatoryAttribute', FALSE,["","ignore","optional"],"keep",["keep","ignore","optional"]),
+              new SelectAttribute(
+                _('Optional Attribute'), _('Optional Attribute Policie'),
+                'fdAccessFederationOptionalAttribute', FALSE,["","ignore"],"keep",["keep","ignore"]),
+
+          new ButtonAttribute(_('Push Federation Configuration'), _('Push configuration'),
+          'fdAccessFederationPushConfiguration', _('Push'),'pushconfig'
+            ),
+          ],
+        ],
       'content' => [
         'name'  => _('Content of Federation'),
         'attrs' => [
           new FakeAttribute('fdFederationContent'),
           ],
-        //'template' => get_template_path('datacenter.tpl', TRUE, dirname(__FILE__)),
         ],
-    ];
+      ];
+    //];
   }
 
 
