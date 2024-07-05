@@ -21,6 +21,10 @@
 
 class accessManagement extends management
 {
+
+  // template systeme activation
+  public static $skipTemplates = FALSE;
+
   public static function plInfo (): array
   {
     return [
