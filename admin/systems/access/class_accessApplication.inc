@@ -67,8 +67,7 @@ class accessWebApplication extends simplePlugin
   }
 
 
-  function array_diff_recursive($arr1, $arr2)
-  {
+  function array_diff_recursive($arr1, $arr2)  {
     #thanks : https://stackoverflow.com/questions/3876435/recursive-array-diff
       $outputDiff = [];
       foreach ($arr1 as $key => $value)
@@ -358,8 +357,9 @@ class accessWebApplication extends simplePlugin
 
 
   public function typeChanged(){
+
     $this->fdAccessApplicationAuthType=$this->attributesAccess['fdAccessApplicationAuthType']->getValue();
-       
+    
     if ($this->fdAccessApplicationAuthType == "SAML" ){
       $this->attributesAccess['fdAccessApplicationSAMLMetadataFile']->setVisible(TRUE);
 //      $this->attributesAccess['fdAccessEntityAuthority']->setVisible(TRUE);
@@ -383,18 +383,24 @@ class accessWebApplication extends simplePlugin
     }
   }
 
-
+  public function serverChanged(){
+    $this->fdAccessApplicationAuthServerDn = $this->attributesAccess['fdAccessApplicationAuthServerDn']->getValue();
+  }
 
   function __construct ($dn = NULL, $object = NULL, $parent = NULL, $mainTab = FALSE)
   {
     parent::__construct($dn, $object, $parent, $mainTab);
+    
   
+    //$this->updateFieldsChoicesAndValues();
+    //$this->serverChanged();
+    //$this->typeChanged();
     $this->typeAuthentification=array('OIDC','SAML','CAS','HEADER');
     //$this->attributesAccess['fdAccessApplicationAuthType']->setInLdap(FALSE);
     $this->attributesAccess['fdAccessApplicationAuthType']->setChoices($this->typeAuthentification);
-
-    $this->typeChanged();
-    $this->attributesAccess['fdAccessApplicationAuthType']->setSubmitForm('typeChanged');
+    $this->attributesAccess['fdAccessApplicationAuthServerDn']->setSubmitForm('serverChanged');
+    $this->attributesAccess['fdAccessApplicationAuthType']->setSubmitForm('typeChanged');    
+    
   }
 
 
@@ -404,19 +410,18 @@ class accessWebApplication extends simplePlugin
     $access_config_var=array();
     $access_config_display=array();
     $ldap = $config->get_ldap_link();
-      
-    $taxonomy_dn=$config->get_cfg_value('TaxonomyTermsRDN').", ".$config->current['BASE'];
-    $accessref=$config->get_cfg_value('AccessConfigReferential');
+
+   // $this->fdAccessApplicationAuthType  <=== saml / cas / oidc ....
+   if ( ! empty($this->fdAccessApplicationAuthServerDn)){
+    $this->createAccessConnection();
+    $selectArray=$this->remoteAccessHandle->getSelectMapping($this->fdAccessApplicationAuthType);
+    //var_dump($selectArray);
+    //var_dump(array_keys($selectArray));
+    //var_dump(array_values($selectArray));
+    var_dump($this->remoteAccessHandle->getAllOptions($this->fdAccessApplicationAuthType));
+  }
    
-    $ldap->cd($taxonomy_dn);
-    $ldap->search('(&(objectClass=fdTaxonomyTerms)(fdTaxonomyReferentiel='.$accessref.')(fdTaxonomyName='.$this->fdAccessApplicationAuthType.'))', ['fdTaxonomyTermCode','fdTaxonomyTermLongLabel']);
-    while ($access_config = $ldap->fetch()) {
-      $access_config_var[]=$access_config['fdTaxonomyTermCode'][0];
-      $access_config_display[]=$access_config['fdTaxonomyTermLongLabel'][0];
-      
-    }
-    
-    $this->attributesAccess['fdAccessApplicationSettings']->attribute->attributes[0]->setChoices($access_config_var,$access_config_display);
+    $this->attributesAccess['fdAccessApplicationSettings']->attribute->attributes[0]->setChoices(array_keys($selectArray),array_values($selectArray));
 
     /* penser a nettoyer les vieille valeeur en cas de changement de protocole */
 
@@ -431,13 +436,6 @@ class accessWebApplication extends simplePlugin
     return TRUE;
   }
 
-
-  public function update2 (): bool
-  {
-    parent::update();
-
-    return TRUE;
-  }
 
   protected function prepare_save (): array
   {
