@@ -7,10 +7,73 @@ class LemonLDAPNG {
     private $headers = array('Accept' => 'application/json', 'Content-Type' => 'application/json');
     private $param = array();
 
+    private $currentMapping=array();
 
-  public function __construct($cnx) {
+    private $mappingFD =array(
+        "COMMON" => array(
+                "fdAuthLevel"           => array("remotesso" =>  "casAppMetaDataOptionsAuthnLevel", "validation" => "is_int", "label" => "Authentification Level"),
+                ),
+        "CAS" => array(
+                "fdCASLogoutURL"        => array("remotesso" =>  "casAppMetaDataOptionsLogout", "validation" => "is_uri", "label" => "Logout URL"),
+                "fdCASRule"             => array("remotesso" =>  "casAppMetaDataOptionsRule", "validation" => "is_string", "label" => "Activation Rule"),
+                "fdCASURLService"       => array("remotesso" =>  "casAppMetaDataOptionsService", "validation" => "is_uri", "label" => "Services Url(s)"),
+                "fdCASUserAttribute"    => array("remotesso" =>  "casAppMetaDataOptionsUserAttribute", "validation" => "is_string", "label" => "key used for user Id"),
+                ),
+        "OIDC" => array(
+                "fdOIDCClientID"        => array("remotesso" =>  "oidcRPMetaDataOptionsClientID", "validation" => "is_string", "label" => "Client ID"),
+                "fdOIDCClientSecret"    => array("remotesso" =>  "oidcRPMetaDataOptionsClientSecret", "validation" => "is_strning", "label" => "Client Seccret"),
+                "fdOIDCLogoutType"      => array("remotesso" =>  "oidcRPMetaDataOptionsLogoutType", "validation" => "is_string", "label" => "LogoutType"),
+                "fdOIDCRedirectURIs"    => array("remotesso" =>  "oidcRPMetaDataOptionsRedirectUris", "validation" => "is_uri", "label" => "Redirect URI"),
+                ),
+        "SAML" => array(
+                "fdSAMLIDPInitiated"    => array("remotesso" =>  "samlSPMetaDataOptionsEnableIDPInitiatedURL", "validation" => "is_bool", "label" => "InitiatedIDP"),
+                "fdSAMLSignSLO"         => array("remotesso" =>  "samlSPMetaDataOptionsSignSLOMessage", "validation" => "is_bool", "label" => "Signing Single Log out"),
+                "fdSAMLSignSSO"         => array("remotesso" =>  "samlSPMetaDataOptionsSignSSOMessage", "validation" => "is_bool", "label" => "Signing Single Sign On"),
+                "fdSAMLSignatureMethod" => array("remotesso" =>  "samlSPMetaDataOptionsSignatureMethod", "validation" => "is_uri", "label" => "Signature Method"),
+        ),
+
+    );
+
+    private function is_bool($val){
+        return(true);
+    }
+
+    private function is_integer($val){
+        return(true);
+    }
+
+    private function is_string($val){
+        return(true);
+    }
+
+    private function is_uri($val){
+        return(true);
+    }
+
+
+    public function getOptionsMapping($protocol){
+        return(array_merge($this->mappingFD[$protocol], $this->mappingFD['COMMON']));
+    }
+
+
+    public function getMappingSSOAttribute($type,$fdAttr){
+        $mergeArray=array_merge($this->mappingFD[$type], $this->mappingFD['COMMON']);
+        return($mergeArray[$fdAttr]['remotesso']);
+    }
+
+    public function getMappingSSOLabel($type,$fdAttr){
+        $mergeArray=array_merge($this->mappingFD[$type], $this->mappingFD['COMMON']);
+        return($mergeArray[$fdAttr][$fdAtrr]['label']);
+    }
+
+    public function validateMappingSSOValue($type,$fdAttr){
+        $mergeArray=array_merge($this->mappingFD[$type], $this->mappingFD['COMMON']);
+        $validateFocntion=$this->mappingFD[$type][$fdAttr]['validation'];
+    }
+
+    public function __construct($cnx) {
         $this->cnx = $cnx;
-  }
+    }
 
     public function checkStatus(){
             $handle = new RestClient($this->cnx);

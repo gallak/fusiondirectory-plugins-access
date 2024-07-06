@@ -20,115 +20,20 @@ class accessMethodLemonLDAPNG {
     );
 
 
-    //public function generateConfig(): {
-
-
-    //}
-
-/* conf CAS
-   "casAppMetaDataExportedVars":{
-      "appli-cas":{
-         "cn":"cn",
-         "mail":"mail",
-         "uid":"uid"
-      }
-   },
-   "casAppMetaDataMacros":{
-      "appli-cas":{
-         "macro1":"text()",
-         "macro2":"text()"
-      }
-   },
-   "casAppMetaDataOptions":{
-      "appli-cas":{
-         "casAppMetaDataOptionsAuthnLevel":"2",
-         "casAppMetaDataOptionsComment":"Commentaire de l'appli CAS",
-         "casAppMetaDataOptionsDisplayName":"Application CAS",
-         "casAppMetaDataOptionsLogout":0,
-         "casAppMetaDataOptionsService":"https://appli.futur.fr",
-         "casAppMetaDataOptionsUserAttribute":"uid"
-      }
-   },
-
-{
-  "confKey": "sp-fed-prd-moodle-univ-lyon1-fr-shibboleth",
-  "macros": {},
-  "exportedAttributes": {
-    "mail": {
-      "friendlyName": "mail",
-      "mandatory": "true",
-      "name": "urn:oid:0.9.2342.19200300.100.1.3",
-      "format": "urn:oasis:names:tc:SAML:2.0:attrname-format:uri"
-    },
-    "givenName": {
-      "friendlyName": "givenName",
-      "mandatory": "true",
-      "name": "urn:oid:2.5.4.42",
-      "format": "urn:oasis:names:tc:SAML:2.0:attrname-format:uri"
-    },
-    "eduPersonPrincipalName": {
-      "friendlyName": "eduPersonPrincipalName",
-      "mandatory": "true",
-      "name": "urn:oid:1.3.6.1.4.1.5923.1.1.1.6",
-      "format": "urn:oasis:names:tc:SAML:2.0:attrname-format:uri"
-    },
-    "sn": {
-      "friendlyName": "sn",
-      "mandatory": "true",
-      "name": "urn:oid:2.5.4.4",
-      "format": "urn:oasis:names:tc:SAML:2.0:attrname-format:uri"
+    public function getAllOptions($protocole){
+        $handle= new LemonLDAPNG($conf);
+        return($handle->getOptionsMapping($protocole));
     }
-  },
-  "options": {
-    "checkSSOMessageSignature": "0",
-    "enableIDPInitiatedURL": "0",
-    "oneTimeUse": "0",
-    "encryptionMode": "none",
-    "signSLOMessage": "1",
-    "signSSOMessage": "1",
-    "sessionNotOnOrAfterTimeout": "72000",
-    "checkSLOMessageSignature": "0",
-    "nameIDFormat": "",
-    "notOnOrAfterTimeout": "72000",
-    "forceUTF8": "1"
-  },
-  "metadata": "<md:Entit
 
-}
-
-
-
-public function doLogin() {
-
-    $options= array( "username" => $this->username, "password" => $this->password, 'base_url' => $this->server_url);
-    $param = array();
-    $headers = array('Accept' => 'application/json');
-    $apiClient = new RestClient($options);
-    $result = $apiClient->post('/login',$param,$headers);
-    if ( $result->info->http_code == "200" ){
-        $this->server_token = $result->decode_response()->api_key;
-    }else{
-        print( "Error while getting token" );
+    // retrun array for filling select attribute
+    public function getSelectMapping($protocol){
+        $selectArray=array();
+        $handle= new LemonLDAPNG($conf);
+        foreach($handle->getOptionsMapping($protocol) as $key => $value){
+            $selectArray[$key]=$value['label'];
+        }
+        return($selectArray);
     }
-  }
-
-  private function getRemoteObjects($request){
-    $param = array();
-    $headers = array('Accept' => 'application/json', 'Authorization' => $this->server_token);
-    $apiClient = new RestClient();
-    $apiClient->set_option('headers', $headers);
-    $apiClient->set_option('base_url',$this->server_url.$this->server_uri);
-
-    $result = $apiClient->get('/object/'.$request);
-    if ( $result->info->http_code == "200" ){
-        return($result->decode_response());
-    }else{
-        print( "Error while Remote Objects" );
-    }
-}
-
-*/
-
 
     public function getMethodCode(): string{
         return($this->code);
