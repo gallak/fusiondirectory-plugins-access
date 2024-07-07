@@ -27,6 +27,7 @@ class accessWebApplication extends simplePlugin
   public $protocol = "CAS";
   // handle contain remote Access Management Service
   private $remoteAccessHandle;
+  private $applicationOptionsMapping=array();
 
   static function plInfo (): array
   {
@@ -414,14 +415,15 @@ class accessWebApplication extends simplePlugin
    // $this->fdAccessApplicationAuthType  <=== saml / cas / oidc ....
    if ( ! empty($this->fdAccessApplicationAuthServerDn)){
     $this->createAccessConnection();
-    $selectArray=$this->remoteAccessHandle->getSelectMapping($this->fdAccessApplicationAuthType);
+    $this->applicationOptionsMapping=$this->remoteAccessHandle->getSelectMapping($this->fdAccessApplicationAuthType);
     //var_dump($selectArray);
     //var_dump(array_keys($selectArray));
     //var_dump(array_values($selectArray));
-    var_dump($this->remoteAccessHandle->getAllOptions($this->fdAccessApplicationAuthType));
+    //var_dump($this->remoteAccessHandle->getAllOptions($this->fdAccessApplicationAuthType));
+    $this->attributesAccess['fdAccessApplicationSettings']->attribute->attributes[0]->setChoices(array_keys($this->applicationOptionsMapping),array_values($this->applicationOptionsMapping));
   }
    
-    $this->attributesAccess['fdAccessApplicationSettings']->attribute->attributes[0]->setChoices(array_keys($selectArray),array_values($selectArray));
+    
 
     /* penser a nettoyer les vieille valeeur en cas de changement de protocole */
 
@@ -429,6 +431,14 @@ class accessWebApplication extends simplePlugin
   }
     /* Values */
 
+/*
+TODO
+ * adapter la routind d'insertion de cofn dans LL:NG avec le mapping
+ * faire une heritage de classe pour les fonction communes lemon et keycloak
+ * inserer les controle de valeur
+ * sortire clientId et client Secret des options
+*/
+  
   public function update (): bool
   {
     parent::update();
