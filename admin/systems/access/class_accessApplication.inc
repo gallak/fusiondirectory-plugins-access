@@ -204,7 +204,7 @@ class accessWebApplication extends simplePlugin
              'fdAccessApplicationAuthType', TRUE,['OIDC','SAML','CAS','HEADER'],'',['OIDC','SAML','CAS','HEADER']),
           new SelectAttribute(
               _('type'), _('Type'),
-              'fdAccessEntityType', TRUE,["IDP","SP"],"IDP",["IDP","SP"]),
+              'fdAccessEntityType', FALSE,["IDP","SP"],"IDP",["IDP","SP"]),
           new StringAttribute(
               _('Federation'), _('Url of Federation if SP has been imported from a SAML Federation'),
               'fdAccessEntityAuthority', FALSE),
@@ -367,6 +367,7 @@ class accessWebApplication extends simplePlugin
       $this->attributesAccess['o']->setVisible(TRUE);
       $this->attributesAccess['mail']->setVisible(TRUE);
       $this->attributesAccess['fdAccessApplicationService']->setVisible(FALSE);
+      $this->attributesAccess['fdAccessEntityType']->setVisible(TRUE);
     }else{
       $this->attributesAccess['fdAccessApplicationSAMLMetadataFile']->setVisible(FALSE);
       $this->attributesAccess['fdAccessApplicationService']->setVisible(TRUE);
@@ -374,11 +375,13 @@ class accessWebApplication extends simplePlugin
       $this->attributesAccess['fdAccessEntityAuthority']->setVisible(FALSE);
       $this->attributesAccess['o']->setVisible(FALSE);
       $this->attributesAccess['mail']->setVisible(FALSE);
+      $this->attributesAccess['fdAccessEntityType']->setVisible(FALSE);
     }
     
     if ($this->fdAccessApplicationAuthType == "OIDC" ){
       $this->attributesAccess['fdAccessApplicationScopeRules']->setVisible(TRUE);
       $this->attributesAccess['fdAccessApplicationService']->setVisible(TRUE);
+      $this->attributesAccess['fdAccessEntityType']->setVisible(FALSE);
     }else{
       $this->attributesAccess['fdAccessApplicationScopeRules']->setVisible(FALSE);
     }
