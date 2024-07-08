@@ -18,6 +18,62 @@
   Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301, USA.
  */
 
+/* instanciation of CompositeAttribute in order to add check value features */
+ class ssoOptionsCharSeparatedCompositeAttribute extends CompositeAttribute
+ {
+   function __construct ($label, $description, $ldapName, $acl = "")
+   {
+    //var_dump($remote);
+    //var_dump(accessRemoteCommon::list_accessRemoteMethod());
+    //var_dump(parent::getParent());
+  
+    //var_dump($this->attributes);
+
+    parent::__construct(
+       $description, $ldapName,
+       [
+         new SelectAttribute(
+           _('options'), _('options'),
+           'fdAccessApplicationSettings_var', TRUE,
+           array(), '',
+           array()
+         ),
+         new StringAttribute(
+           _('Value'), _('value'),
+           'fdAccessApplicationSettings_value', TRUE
+         )
+       ],
+       '/^([^;]+);(.*)$/',
+       '%s;%s',
+       $acl, $label
+     );
+   }
+ 
+  
+   function check ()
+   {
+      $rule=$this->getParent()->getRemoteSSOMapping()[$this->attributes[0]->getValue()];
+
+      if ( ! accessRemoteValidation::runTest($rule['validation'],$this->attributes[1]->getValue())){
+        return new SimplePluginCheckError(
+          $this,
+          htmlescape(sprintf("Error on %s attribute see: %s value provided %s",$this->attributes[0]->getValue(),$rule['syntax'],$this->attributes[1]->getValue()))
+        );
+      }else{
+        $this->attributes[1]->setValue($this->attributes[1]->getValue());
+      }
+   }
+   
+ }
+ 
+
+
+
+
+
+
+
+
 
 class accessWebApplication extends simplePlugin
 {
@@ -28,6 +84,7 @@ class accessWebApplication extends simplePlugin
   // handle contain remote Access Management Service
   private $remoteAccessHandle;
   private $applicationOptionsMapping=array();
+  public
 
   static function plInfo (): array
   {
@@ -39,6 +96,14 @@ class accessWebApplication extends simplePlugin
       'plObjectType'  => ['webApplication'],
       'plProvidedAcls'  => parent::generatePlProvidedAcls(static::getAttributesInfo())
     ];
+  }
+
+
+  public function getRemoteSSOType(){
+    return($this->remoteAccessHandle->getMethodCode());
+  }
+  public function getRemoteSSOMapping(){
+    return($this->applicationOptionsMapping);
   }
 
 
@@ -196,11 +261,6 @@ class accessWebApplication extends simplePlugin
 
 
 
-  #FIXE les OU de depart pour les entites de renater et teste la copie vers une autre ou !
-
-
-
-
   static function getAttributesInfo (): array
   {
     global $config;
@@ -341,18 +401,14 @@ class accessWebApplication extends simplePlugin
         'name'  => _('Specific settings'),
         //'class' => ['fullwidth'],
         'attrs' => [ 
+          //$label, $description, $ldapName, $acl = "",$remote)
             new OrderedArrayAttribute(
-              new CharSeparatedCompositeAttribute(
+              new ssoOptionsCharSeparatedCompositeAttribute(
+              //new CharSeparatedCompositeAttribute(
+                _('Settings'),
                 _('All specific settings per application'),
                 'fdAccessApplicationSettings',
-                [
-                  new SelectAttribute('', '', 'fdAccessApplicationSettings_var', TRUE),
-                  new StringAttribute('', '', 'fdAccessApplicationSettings_value', TRUE)
-                ],
-                ';',
-                '',
-                '',
-                _('Settings')
+                ''
               ),
               // no order
               FALSE,
@@ -373,7 +429,7 @@ class accessWebApplication extends simplePlugin
     
     if ($this->fdAccessApplicationAuthType == "SAML" ){
       $this->attributesAccess['fdAccessApplicationSAMLMetadataFile']->setVisible(TRUE);
-//      $this->attributesAccess['fdAccessEntityAuthority']->setVisible(TRUE);
+      $this->attributesAccess['fdAccessEntityAuthority']->setVisible(TRUE);
       $this->attributesAccess['o']->setVisible(TRUE);
       $this->attributesAccess['mail']->setVisible(TRUE);
       $this->attributesAccess['fdAccessApplicationService']->setVisible(FALSE);
@@ -392,6 +448,12 @@ class accessWebApplication extends simplePlugin
       $this->attributesAccess['fdAccessApplicationScopeRules']->setVisible(TRUE);
       $this->attributesAccess['fdAccessApplicationService']->setVisible(TRUE);
       $this->attributesAccess['fdAccessEntityType']->setVisible(FALSE);
+
+      $this->attributesAccess['fdAccessApplicationSAMLMetadataFile']->setVisible(FALSE);
+      $this->attributesAccess['fdAccessEntityAuthority']->setVisible(FALSE);
+      $this->attributesAccess['o']->setVisible(FALSE);
+      $this->attributesAccess['mail']->setVisible(FALSE);
+
     }else{
       $this->attributesAccess['fdAccessApplicationScopeRules']->setVisible(FALSE);
     }
@@ -429,6 +491,7 @@ class accessWebApplication extends simplePlugin
       $selectArray[$key]=$value['label'];
     }
     $this->attributesAccess['fdAccessApplicationSettings']->attribute->attributes[0]->setChoices(array_keys($selectArray),array_values($selectArray));
+    //$this->attributesAccess['fdAccessApplicationSettings']->attributes=$this->applicationOptionsMapping;
   }
    
     

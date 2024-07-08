@@ -1,5 +1,34 @@
 <?php
 
+
+
+
+/* small php classe dedicated to test value */
+class accessRemoteValidation{
+
+    static function runTest($rule,$value){
+        return($rule($value));  
+    }
+    
+    private function is_bool($val){
+        return(true);
+    }
+    
+    private function is_integer($val){
+        return(true);
+    }
+    
+    private function is_string($val){
+        var_dump($val);
+        return(true);
+    }
+    
+    private function is_uri($val){
+        return(true);
+    }
+}
+
+
 class accessRemoteCommon {
 
     private $cnx=array();
@@ -26,7 +55,7 @@ class accessRemoteCommon {
                 ),
         "OIDC" => array(
                 "fdOIDCClientID"        => array("remotesso" =>  "Remote_OIDC_ClientID", "validation" => "is_string", "label" => "Client ID"),
-                "fdOIDCClientSecret"    => array("remotesso" =>  "Remote_OIDC_ClientSecret", "validation" => "is_strning", "label" => "Client Seccret"),
+                "fdOIDCClientSecret"    => array("remotesso" =>  "Remote_OIDC_ClientSecret", "validation" => "is_string", "label" => "Client Seccret"),
                 "fdOIDCLogoutType"      => array("remotesso" =>  "Remote_OIDC_LogoutType", "validation" => "is_string", "label" => "LogoutType"),
                 "fdOIDCRedirectURIs"    => array("remotesso" =>  "Remote_OIDC_RedirectUris", "validation" => "is_uri", "label" => "Redirect URI"),
                 ),
@@ -40,6 +69,21 @@ class accessRemoteCommon {
     );
 
 
+    static function list_accessRemoteMethod(){
+
+
+        global $class_mapping;
+        $available = [];
+        foreach ($class_mapping as $class => $path) {
+          if (preg_match('/^accessRemote(.+)/', $class, $m)) {
+            //$available[$m[1]] = $class::getName();
+            $available[]=$class;
+          }
+        }
+
+        return($available);
+    }
+
     // improve FD mapping with real remote parameters
     public function updateMappingFD ($localMapping) {
         foreach ( $localMapping as $pk => $pv){
@@ -51,28 +95,22 @@ class accessRemoteCommon {
         }
     }
 
-    private function is_bool($val){
-        return(true);
+
+
+    public function getValidation($attr){
+        foreach(self::$mappingFD as $protocol){
+            foreach($protocol as $k => $v){
+                if ( $k == $attr){
+                    return($v[$k]['validation']);
+                }
+            }
+        }
+
     }
 
-    private function is_integer($val){
-        return(true);
-    }
-
-    private function is_string($val){
-        return(true);
-    }
-
-    private function is_uri($val){
-        return(true);
-    }
+    
 
 
-
-    public function validateMappingSSOValue($type,$fdAttr){
-        $mergeArray=array_merge($this->mappingFD[$type], $this->mappingFD['COMMON']);
-        $validateFocntion=$this->mappingFD[$type][$fdAttr]['validation'];
-    }
 
     public function __construct($cnx) {
         $this->cnx = $cnx;

@@ -17,14 +17,14 @@ class accessRemoteLemonLDAPNG extends accessRemoteCommon {
     private $mappingLLNG =array(
         "COMMON" => array(),
         "CAS" => array(
-                "fdCASAuthLevel"           => array("remotesso" =>  "casAppMetaDataOptionsAuthnLevel"),
-                "fdCASLogoutURL"        => array("remotesso" =>  "casAppMetaDataOptionsLogout"),
+                "fdCASAuthLevel"        => array("remotesso" =>  "casAppMetaDataOptionsAuthnLevel","syntax" => "It must an integer corresponding to auth Level see : https://lemonldap-ng.org"),
+                "fdCASLogoutURL"        => array("remotesso" =>  "casAppMetaDataOptionsLogout","syntax" => "It must an URI"),
                 "fdCASRule"             => array("remotesso" =>  "casAppMetaDataOptionsRule"),
                 "fdCASURLService"       => array("remotesso" =>  "casAppMetaDataOptionsService"),
                 "fdCASUserAttribute"    => array("remotesso" =>  "casAppMetaDataOptionsUserAttribute"),
                 ),
         "OIDC" => array(
-                "fdOIDCClientID"        => array("remotesso" =>  "oidcRPMetaDataOptionsClientID"),
+                "fdOIDCClientID"        => array("remotesso" =>  "oidcRPMetaDataOptionsClientID","syntax" => "It must an string see : https://lemonldap-ng.org"),
                 "fdOIDCClientSecret"    => array("remotesso" =>  "oidcRPMetaDataOptionsClientSecret"),
                 "fdOIDCLogoutType"      => array("remotesso" =>  "oidcRPMetaDataOptionsLogoutType"),
                 "fdOIDCRedirectURIs"    => array("remotesso" =>  "oidcRPMetaDataOptionsRedirectUris"),
