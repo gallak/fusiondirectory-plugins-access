@@ -1,6 +1,6 @@
 <?php
 
-class KeyCloak extends RemoteCommon {
+class accessRemoteKeyCloak extends accessRemoteCommon {
 
     private $cnx=array();
     private $uri="/api/v1";

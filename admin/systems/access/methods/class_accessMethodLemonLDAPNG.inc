@@ -22,7 +22,7 @@ class accessMethodLemonLDAPNG {
 
     // retrun all option per protocol
     public function getRemoteAccessServerMapping($protocol){
-        $handle= new LemonLDAPNG($conf);
+        $handle= new accessRemoteLemonLDAPNG($conf);
         return($handle->getOptionsMapping($protocol));
     }
 
@@ -41,13 +41,13 @@ class accessMethodLemonLDAPNG {
 
     //Revoir les construceurs et implication access Method et LemopnLDAP
     function checkStatus($conf) {
-        $handle= new LemonLDAPNG($conf);
+        $handle= new accessRemoteLemonLDAPNG($conf);
         return($handle->checkStatus());
     }
 
     function addApplication($type,$content){
         $addfct="add".ucfirst(strtolower($type))."App";
-        $handle=new LemonLDAPNG($this->serviceConfig);
+        $handle=new accessRemoteLemonLDAPNG($this->serviceConfig);
         $res=$handle->$addfct($content);
         return($res);
     }
@@ -55,7 +55,7 @@ class accessMethodLemonLDAPNG {
 
     function replaceApplication($type,$content){
         $replacefct="replace".ucfirst(strtolower($type))."App";
-        $handle=new LemonLDAPNG($this->serviceConfig);
+        $handle=new accessRemoteLemonLDAPNG($this->serviceConfig);
         $res=$handle->$replacefct(json_decode($content)->confKey,$content);
         return($res);
     }
@@ -63,7 +63,7 @@ class accessMethodLemonLDAPNG {
     function ifExistApplication($type,$appConfKey){
 
         $getfct="get".ucfirst(strtolower($type))."AppByConfKey";
-        $handle=new LemonLDAPNG($this->serviceConfig);
+        $handle=new accessRemoteLemonLDAPNG($this->serviceConfig);
         $res=$handle->$getfct($appConfKey);
         if ( $res['code'] == 200 ){
             return(true);
@@ -77,7 +77,7 @@ class accessMethodLemonLDAPNG {
     function checkApplication($type,$appConfKey){
 
         $getfct="get".ucfirst(strtolower($type))."AppByConfKey";
-        $handle=new LemonLDAPNG($this->serviceConfig);
+        $handle=new accessRemoteLemonLDAPNG($this->serviceConfig);
         $res=$handle->$getfct($appConfKey);
         
         if ( preg_match("/^4..$/",$res['code'])){
@@ -91,7 +91,7 @@ class accessMethodLemonLDAPNG {
     function getApplication($type,$appConfKey){
 
         $getfct="get".ucfirst(strtolower($type))."AppByConfKey";
-        $handle=new LemonLDAPNG($this->serviceConfig);
+        $handle=new accessRemoteLemonLDAPNG($this->serviceConfig);
         $res=$handle->$getfct($appConfKey);
         return($res);
         /*if ( preg_match("/^4..$/",$res['code'])){
@@ -106,7 +106,7 @@ class accessMethodLemonLDAPNG {
     function importApplication($type,$appConfKey){
 
         $getfct="get".ucfirst(strtolower($type))."AppByConfKey";
-        $handle=new LemonLDAPNG($this->serviceConfig);
+        $handle=new accessRemoteLemonLDAPNG($this->serviceConfig);
         $res=$handle->$getfct($appConfKey);
 
      
@@ -157,7 +157,7 @@ class accessMethodLemonLDAPNG {
         $res=array();
         if ($this->ifExistApplication($type,$appConfKey)){
             $delfct="delete".ucfirst(strtolower($type))."App";
-            $handle=new LemonLDAPNG($this->serviceConfig);
+            $handle=new accessRemoteLemonLDAPNG($this->serviceConfig);
             $res=$handle->$delfct($appConfKey);
         }
         if ( preg_match("/^4..$/",$res['code'])){

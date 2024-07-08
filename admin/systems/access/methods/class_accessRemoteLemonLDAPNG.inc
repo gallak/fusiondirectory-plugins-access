@@ -1,6 +1,6 @@
 <?php
 
-class LemonLDAPNG extends RemoteCommon {
+class accessRemoteLemonLDAPNG extends accessRemoteCommon {
 
     private $cnx=array();
     private $uri="/api/v1";

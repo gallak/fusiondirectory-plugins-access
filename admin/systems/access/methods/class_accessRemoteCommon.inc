@@ -1,6 +1,6 @@
 <?php
 
-class RemoteCommon {
+class accessRemoteCommon {
 
     private $cnx=array();
     private $uri="";
