@@ -406,11 +406,7 @@ class accessWebApplication extends simplePlugin
     parent::__construct($dn, $object, $parent, $mainTab);
     
   
-    //$this->updateFieldsChoicesAndValues();
-    //$this->serverChanged();
-    //$this->typeChanged();
     $this->typeAuthentification=array('OIDC','SAML','CAS','HEADER');
-    //$this->attributesAccess['fdAccessApplicationAuthType']->setInLdap(FALSE);
     $this->attributesAccess['fdAccessApplicationAuthType']->setChoices($this->typeAuthentification);
     $this->attributesAccess['fdAccessApplicationAuthServerDn']->setSubmitForm('serverChanged');
     $this->attributesAccess['fdAccessApplicationAuthType']->setSubmitForm('typeChanged');    
@@ -425,17 +421,13 @@ class accessWebApplication extends simplePlugin
     $access_config_display=array();
     $ldap = $config->get_ldap_link();
 
-   // $this->fdAccessApplicationAuthType  <=== saml / cas / oidc ....
-   if ( ! empty($this->fdAccessApplicationAuthServerDn)){
+      if ( ! empty($this->fdAccessApplicationAuthServerDn)){
     $this->createAccessConnection();
     $this->applicationOptionsMapping=$this->remoteAccessHandle->getRemoteAccessServerMapping($this->fdAccessApplicationAuthType);
+    // get only key and label for selectr option
     foreach($this->applicationOptionsMapping as $key => $value){
       $selectArray[$key]=$value['label'];
     }
-    //var_dump($selectArray);
-    //var_dump(array_keys($selectArray));
-    //var_dump(array_values($selectArray));
-    //var_dump($this->remoteAccessHandle->getAllOptions($this->fdAccessApplicationAuthType));
     $this->attributesAccess['fdAccessApplicationSettings']->attribute->attributes[0]->setChoices(array_keys($selectArray),array_values($selectArray));
   }
    
@@ -449,7 +441,7 @@ class accessWebApplication extends simplePlugin
 
 /*
 TODO
- * adapter la routind d'insertion de cofn dans LL:NG avec le mapping
+ * DONE : adapter la routind d'insertion de cofn dans LL:NG avec le mapping
  * faire une heritage de classe pour les fonction communes lemon et keycloak
  * inserer les controle de valeur
  * sortire clientId et client Secret des options
