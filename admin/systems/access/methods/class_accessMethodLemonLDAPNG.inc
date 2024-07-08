@@ -20,19 +20,10 @@ class accessMethodLemonLDAPNG {
     );
 
 
-    public function getAllOptions($protocole){
+    // retrun all option per protocol
+    public function getRemoteAccessServerMapping($protocol){
         $handle= new LemonLDAPNG($conf);
-        return($handle->getOptionsMapping($protocole));
-    }
-
-    // retrun array for filling select attribute
-    public function getSelectMapping($protocol){
-        $selectArray=array();
-        $handle= new LemonLDAPNG($conf);
-        foreach($handle->getOptionsMapping($protocol) as $key => $value){
-            $selectArray[$key]=$value['label'];
-        }
-        return($selectArray);
+        return($handle->getOptionsMapping($protocol));
     }
 
     public function getMethodCode(): string{

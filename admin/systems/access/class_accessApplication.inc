@@ -120,6 +120,7 @@ class accessWebApplication extends simplePlugin
     $this->save();
   }
 
+  // get data form FD record and store it an associative array before translating it to remote Access server syntax ( pivot format)
   function generateAppData(){
       global $config;
       $ldap = $config->get_ldap_link();
@@ -160,7 +161,16 @@ class accessWebApplication extends simplePlugin
         $application['macros'] = $this->fdAccessApplicationMacros;
       }
       if (! empty($this->fdAccessApplicationSettings)){
-        $application['options'] = $this->fdAccessApplicationSettings;
+        var_dump($this->fdAccessApplicationSettings);
+        //$application['options'] = $this->fdAccessApplicationSettings;
+        var_dump($this->applicationOptionsMapping);
+        foreach ($this->fdAccessApplicationSettings as $val){
+          $keyvalue=preg_split("/;/",$val);
+          $application['options'][]=$this->applicationOptionsMapping[$keyvalue[0]]['remotesso'].";".$keyvalue[1];
+        }
+
+
+        var_dump($application['options']);
       }
       
       
@@ -418,12 +428,15 @@ class accessWebApplication extends simplePlugin
    // $this->fdAccessApplicationAuthType  <=== saml / cas / oidc ....
    if ( ! empty($this->fdAccessApplicationAuthServerDn)){
     $this->createAccessConnection();
-    $this->applicationOptionsMapping=$this->remoteAccessHandle->getSelectMapping($this->fdAccessApplicationAuthType);
+    $this->applicationOptionsMapping=$this->remoteAccessHandle->getRemoteAccessServerMapping($this->fdAccessApplicationAuthType);
+    foreach($this->applicationOptionsMapping as $key => $value){
+      $selectArray[$key]=$value['label'];
+    }
     //var_dump($selectArray);
     //var_dump(array_keys($selectArray));
     //var_dump(array_values($selectArray));
     //var_dump($this->remoteAccessHandle->getAllOptions($this->fdAccessApplicationAuthType));
-    $this->attributesAccess['fdAccessApplicationSettings']->attribute->attributes[0]->setChoices(array_keys($this->applicationOptionsMapping),array_values($this->applicationOptionsMapping));
+    $this->attributesAccess['fdAccessApplicationSettings']->attribute->attributes[0]->setChoices(array_keys($selectArray),array_values($selectArray));
   }
    
     

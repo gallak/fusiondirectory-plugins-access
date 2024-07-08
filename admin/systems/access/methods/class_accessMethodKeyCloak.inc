@@ -15,21 +15,14 @@ class accessMethodKeyCloak {
         return($this->name);
     }
 
-    public function getAllOptions($protocole){
+    
+
+
+    // retrun array for filling select attribute
+    public function getRemoteAccessServerMapping($protocol){
         $handle= new KeyCloak($conf);
-        return($handle->getOptionsMapping($protocole));
+        return($handle->getOptionsMapping($protocol));
     }
-
-
-        // retrun array for filling select attribute
-        public function getSelectMapping($protocol){
-            $selectArray=array();
-            $handle= new KeyCloak($conf);
-            foreach($handle->getOptionsMapping($protocol) as $key => $value){
-                $selectArray[$key]=$value['label'];
-            }
-            return($selectArray);
-        }
 
 
     function setConfig($conf) {
