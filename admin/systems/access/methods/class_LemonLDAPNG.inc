@@ -1,6 +1,6 @@
 <?php
 
-class LemonLDAPNG {
+class LemonLDAPNG extends RemoteCommon {
 
     private $cnx=array();
     private $uri="/api/v1";
@@ -9,70 +9,46 @@ class LemonLDAPNG {
 
     private $currentMapping=array();
 
-    private $mappingFD =array(
-        "COMMON" => array(
-                "fdAuthLevel"           => array("remotesso" =>  "casAppMetaDataOptionsAuthnLevel", "validation" => "is_int", "label" => "Authentification Level"),
-                ),
+    /* local mapping 
+      - remotesso : name of LL::NG variable
+      - validation : rule for validate entered data
+      - label : text shown in drop list    
+    */
+    private $mappingLLNG =array(
+        "COMMON" => array(),
         "CAS" => array(
-                "fdCASLogoutURL"        => array("remotesso" =>  "casAppMetaDataOptionsLogout", "validation" => "is_uri", "label" => "Logout URL"),
-                "fdCASRule"             => array("remotesso" =>  "casAppMetaDataOptionsRule", "validation" => "is_string", "label" => "Activation Rule"),
-                "fdCASURLService"       => array("remotesso" =>  "casAppMetaDataOptionsService", "validation" => "is_uri", "label" => "Services Url(s)"),
-                "fdCASUserAttribute"    => array("remotesso" =>  "casAppMetaDataOptionsUserAttribute", "validation" => "is_string", "label" => "key used for user Id"),
+                "fdCASAuthLevel"           => array("remotesso" =>  "casAppMetaDataOptionsAuthnLevel"),
+                "fdCASLogoutURL"        => array("remotesso" =>  "casAppMetaDataOptionsLogout"),
+                "fdCASRule"             => array("remotesso" =>  "casAppMetaDataOptionsRule"),
+                "fdCASURLService"       => array("remotesso" =>  "casAppMetaDataOptionsService"),
+                "fdCASUserAttribute"    => array("remotesso" =>  "casAppMetaDataOptionsUserAttribute"),
                 ),
         "OIDC" => array(
-                "fdOIDCClientID"        => array("remotesso" =>  "oidcRPMetaDataOptionsClientID", "validation" => "is_string", "label" => "Client ID"),
-                "fdOIDCClientSecret"    => array("remotesso" =>  "oidcRPMetaDataOptionsClientSecret", "validation" => "is_strning", "label" => "Client Seccret"),
-                "fdOIDCLogoutType"      => array("remotesso" =>  "oidcRPMetaDataOptionsLogoutType", "validation" => "is_string", "label" => "LogoutType"),
-                "fdOIDCRedirectURIs"    => array("remotesso" =>  "oidcRPMetaDataOptionsRedirectUris", "validation" => "is_uri", "label" => "Redirect URI"),
+                "fdOIDCClientID"        => array("remotesso" =>  "oidcRPMetaDataOptionsClientID"),
+                "fdOIDCClientSecret"    => array("remotesso" =>  "oidcRPMetaDataOptionsClientSecret"),
+                "fdOIDCLogoutType"      => array("remotesso" =>  "oidcRPMetaDataOptionsLogoutType"),
+                "fdOIDCRedirectURIs"    => array("remotesso" =>  "oidcRPMetaDataOptionsRedirectUris"),
                 ),
         "SAML" => array(
-                "fdSAMLIDPInitiated"    => array("remotesso" =>  "samlSPMetaDataOptionsEnableIDPInitiatedURL", "validation" => "is_bool", "label" => "InitiatedIDP"),
-                "fdSAMLSignSLO"         => array("remotesso" =>  "samlSPMetaDataOptionsSignSLOMessage", "validation" => "is_bool", "label" => "Signing Single Log out"),
-                "fdSAMLSignSSO"         => array("remotesso" =>  "samlSPMetaDataOptionsSignSSOMessage", "validation" => "is_bool", "label" => "Signing Single Sign On"),
-                "fdSAMLSignatureMethod" => array("remotesso" =>  "samlSPMetaDataOptionsSignatureMethod", "validation" => "is_uri", "label" => "Signature Method"),
+                "fdSAMLIDPInitiated"    => array("remotesso" =>  "samlSPMetaDataOptionsEnableIDPInitiatedURL"),
+                "fdSAMLSignSLO"         => array("remotesso" =>  "samlSPMetaDataOptionsSignSLOMessage"),
+                "fdSAMLSignSSO"         => array("remotesso" =>  "samlSPMetaDataOptionsSignSSOMessage"),
+                "fdSAMLSignatureMethod" => array("remotesso" =>  "samlSPMetaDataOptionsSignatureMethod"),
         ),
 
     );
 
-    private function is_bool($val){
-        return(true);
-    }
-
-    private function is_integer($val){
-        return(true);
-    }
-
-    private function is_string($val){
-        return(true);
-    }
-
-    private function is_uri($val){
-        return(true);
-    }
 
 
     public function getOptionsMapping($protocol){
-        return(array_merge($this->mappingFD[$protocol], $this->mappingFD['COMMON']));
+        $this->updateMappingFD($this->mappingLLNG);
+        return($this->mappingFD[$protocol]);
     }
 
-
-    public function getMappingSSOAttribute($type,$fdAttr){
-        $mergeArray=array_merge($this->mappingFD[$type], $this->mappingFD['COMMON']);
-        return($mergeArray[$fdAttr]['remotesso']);
-    }
-
-    public function getMappingSSOLabel($type,$fdAttr){
-        $mergeArray=array_merge($this->mappingFD[$type], $this->mappingFD['COMMON']);
-        return($mergeArray[$fdAttr][$fdAtrr]['label']);
-    }
-
-    public function validateMappingSSOValue($type,$fdAttr){
-        $mergeArray=array_merge($this->mappingFD[$type], $this->mappingFD['COMMON']);
-        $validateFocntion=$this->mappingFD[$type][$fdAttr]['validation'];
-    }
 
     public function __construct($cnx) {
         $this->cnx = $cnx;
+        
     }
 
     public function checkStatus(){

@@ -1,6 +1,6 @@
 <?php
 
-class KeyCloak {
+class KeyCloak extends RemoteCommon {
 
     private $cnx=array();
     private $uri="/api/v1";
@@ -9,59 +9,29 @@ class KeyCloak {
 
     private $currentMapping=array();
 
-    private $mappingFD =array(
+    private $mappinKC =array(
         "COMMON" => array(
-                "fdAuthLevel"           => array("remotesso" =>  "KCAuthnLevel", "validation" => "is_int", "label" => "KC Authentification Level"),
+                "fdAuthLevel"           => array("remotesso" =>  "KCAuthnLevel"),
                 ),
         "OIDC" => array(
-                "fdOIDCClientID"        => array("remotesso" =>  "KCOIDCClientID", "validation" => "is_string", "label" => "KC Client ID"),
-                "fdOIDCClientSecret"    => array("remotesso" =>  "KCOIDCClientSecret", "validation" => "is_strning", "label" => "KC Client Seccret"),
-                "fdOIDCLogoutType"      => array("remotesso" =>  "KCOIDCLogoutType", "validation" => "is_string", "label" => "KC LogoutType"),
-                "fdOIDCRedirectURIs"    => array("remotesso" =>  "KCOIDCRedirectUris", "validation" => "is_uri", "label" => "KC Redirect URI"),
+                "fdOIDCClientID"        => array("remotesso" =>  "KCOIDCClientID"),
+                "fdOIDCClientSecret"    => array("remotesso" =>  "KCOIDCClientSecret"),
+                "fdOIDCLogoutType"      => array("remotesso" =>  "KCOIDCLogoutType"),
+                "fdOIDCRedirectURIs"    => array("remotesso" =>  "KCOIDCRedirectUris"),
                 ),
         "SAML" => array(
-                "fdSAMLIDPInitiated"    => array("remotesso" =>  "KCSAMLEnableIDPInitiatedURL", "validation" => "is_bool", "label" => "KC InitiatedIDP"),
-                "fdSAMLSignSLO"         => array("remotesso" =>  "KCSAMLSignSLOMessage", "validation" => "is_bool", "label" => "KC Signing Single Log out"),
-                "fdSAMLSignSSO"         => array("remotesso" =>  "KCSAMLSignSSOMessage", "validation" => "is_bool", "label" => "KC Signing Single Sign On"),
-                "fdSAMLSignatureMethod" => array("remotesso" =>  "KCSAMLSignatureMethod", "validation" => "is_uri", "label" => "KC Signature Method"),
+                "fdSAMLIDPInitiated"    => array("remotesso" =>  "KCSAMLEnableIDPInitiatedURL"),
+                "fdSAMLSignSLO"         => array("remotesso" =>  "KCSAMLSignSLOMessage"),
+                "fdSAMLSignSSO"         => array("remotesso" =>  "KCSAMLSignSSOMessage"),
+                "fdSAMLSignatureMethod" => array("remotesso" =>  "KCSAMLSignatureMethod"),
         ),
 
     );
 
-    private function is_bool($val){
-        return(true);
-    }
 
-    private function is_integer($val){
-        return(true);
-    }
-
-    private function is_string($val){
-        return(true);
-    }
-
-    private function is_uri($val){
-        return(true);
-    }
-
-
-    public function getOptionsMapping($protocole){
-        return(array_merge($this->mappingFD[$protocole], $this->mappingFD['COMMON']));
-    }
-
-    public function getMappingSSOAttribute($type,$fdAttr){
-        $mergeArray=array_merge($this->mappingFD[$type], $this->mappingFD['COMMON']);
-        return($mergeArray[$fdAttr]['remotesso']);
-    }
-
-    public function getMappingSSOLabel($type,$fdAttr){
-        $mergeArray=array_merge($this->mappingFD[$type], $this->mappingFD['COMMON']);
-        return($mergeArray[$fdAttr][$fdAtrr]['label']);
-    }
-
-    public function validateMappingSSOValue($type,$fdAttr){
-        $mergeArray=array_merge($this->mappingFD[$type], $this->mappingFD['COMMON']);
-        $validateFocntion=$this->mappingFD[$type][$fdAttr]['validation'];
+    public function getOptionsMapping($protocol){
+        $this->updateMappingFD($this->mappingKC);
+        return($this->mappingFD[$protocol]);
     }
 
     public function __construct($cnx) {
