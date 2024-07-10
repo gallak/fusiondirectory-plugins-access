@@ -119,7 +119,6 @@ class accessWebApplication extends simplePlugin
     $ldap->cd($this->fdAccessApplicationAuthServerDn);
     $ldap->search('(objectClass=fdAccessService)', ['fdAccessServiceType','fdAccessServiceURL','fdAccessServiceUser','fdAccessServicePassword']);
     $attrs = $ldap->fetch();
-    var_dump($attrs['fdAccessServiceType'][0]);
     $serviceClass="accessMethod".$attrs['fdAccessServiceType'][0];
     $this->remoteAccessHandle = new $serviceClass;
     $this->remoteAccessHandle->setConfig(array("base_url" => $attrs['fdAccessServiceURL'][0],"username" => $attrs['fdAccessServiceUser'][0], "password" => $attrs['fdAccessServicePassword'][0]));
@@ -239,11 +238,11 @@ class accessWebApplication extends simplePlugin
           $application['options'][]=$this->applicationOptionsMapping[$keyvalue[0]]['remotesso'].";".$keyvalue[1];
         }
       }
-      if (isset($this->fdAccessApplicationOIDCClientID)){
+      if (! empty($this->fdAccessApplicationOIDCClientID)){
         $application['options'][]=$this->applicationOptionsMapping['fdOIDCClientID']['remotesso'].";".$this->fdAccessApplicationOIDCClientID;
       }
 
-      if (isset($this->fdAccessApplicationOIDCClientSecret)){
+      if (! empty($this->fdAccessApplicationOIDCClientSecret)){
         $application['options'][]=$this->applicationOptionsMapping['fdOIDCClientSecret']['remotesso'].";".$this->fdAccessApplicationOIDCClientSecret;
       }
       
@@ -251,11 +250,11 @@ class accessWebApplication extends simplePlugin
       if ( ! empty($this->fdAccessApplicationSAMLMetadataFile)){
         $application['metadata'] = $this->fdAccessApplicationSAMLMetadataFile;
       }
-      if ( isset($this->fdAccessEntityAuthority)){
+      if ( ! empty($this->fdAccessEntityAuthority)){
         $application['options'][] = $this->applicationOptionsMapping['fdSAMLFederationEntityID']['remotesso'].";".$this->fdAccessEntityAuthority;
 
       }
-      if ( isset($this->fdAccessApplicationScopeRules)){
+      if ( ! empty($this->fdAccessApplicationScopeRules)){
         $application['scopeRules'] = $this->fdAccessApplicationScopeRules;
       }
       // add service URI
