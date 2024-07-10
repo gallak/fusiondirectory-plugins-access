@@ -81,6 +81,7 @@ class accessRemoteCommon {
                 "fdSAMLSignSLO"         => array("remotesso" =>  "Remote_SAML_SignSLOMessage", "validation" => "is_bool", "label" => "Signing Single Log out"),
                 "fdSAMLSignSSO"         => array("remotesso" =>  "Remote_SAML_SignSSOMessage", "validation" => "is_bool", "label" => "Signing Single Sign On"),
                 "fdSAMLSignatureMethod" => array("remotesso" =>  "Remote_SAML_SignatureMethod", "validation" => "is_url", "label" => "Signature Method"),
+                "fdSAMLFederationEntityID" => array("remotesso" =>  "Remote_SAML_FederationEntityID", "validation" => "is_url", "label" => "Federation Entity")
         ),
 
     );

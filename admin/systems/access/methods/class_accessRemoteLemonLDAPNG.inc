@@ -47,6 +47,7 @@ class accessRemoteLemonLDAPNG extends accessRemoteCommon {
                 "fdSAMLSignSLO"         => array("remotesso" =>  "samlSPMetaDataOptionsSignSLOMessage"),
                 "fdSAMLSignSSO"         => array("remotesso" =>  "samlSPMetaDataOptionsSignSSOMessage"),
                 "fdSAMLSignatureMethod" => array("remotesso" =>  "samlSPMetaDataOptionsSignatureMethod"),
+                "fdSAMLFederationEntityID" => array("remotesso" =>  "samlSPMetaDataOptionsFederationEntityID", "syntax" => "It must be an URL")
         ),
 
     );
