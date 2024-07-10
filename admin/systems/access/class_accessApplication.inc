@@ -54,11 +54,20 @@
    {
       $rule=$this->getParent()->getRemoteSSOMapping()[$this->attributes[0]->getValue()];
 
-      if ( ! accessRemoteValidation::runTest($rule['validation'],$this->attributes[1]->getValue())){
+      if ( !$rule['range']){
+        $resultTest = accessRemoteValidation::runTest($rule['validation'],$this->attributes[1]->getValue());
+        $resultMessage= $rule['syntax'];
+      }else{
+        $resultTest  = accessRemoteValidation::runTest($rule['validation'],$this->attributes[1]->getValue(),$rule['range']);
+        $resultMessage= $rule['syntax']." with value ".implode(",",$rule['range']);
+      }
+
+      if ( ! $resultTest ){
         return new SimplePluginCheckError(
           $this,
-          htmlescape(sprintf("Error on %s attribute see: %s value provided %s",$this->attributes[0]->getValue(),$rule['syntax'],$this->attributes[1]->getValue()))
+          htmlescape(sprintf("Error on %s attribute : value provided %s. Please see : %s",$this->attributes[0]->getValue(),$this->attributes[1]->getValue(),$resultMessage))
         );
+        $this->attributes[1]->setValue($this->attributes[0]->getValue());
       }else{
         $this->attributes[1]->setValue($this->attributes[1]->getValue());
       }
@@ -457,6 +466,8 @@ class accessWebApplication extends simplePlugin
     }else{
       $this->attributesAccess['fdAccessApplicationScopeRules']->setVisible(FALSE);
     }
+  
+    
   }
 
   public function serverChanged(){
@@ -471,7 +482,8 @@ class accessWebApplication extends simplePlugin
     $this->typeAuthentification=array('OIDC','SAML','CAS','HEADER');
     $this->attributesAccess['fdAccessApplicationAuthType']->setChoices($this->typeAuthentification);
     $this->attributesAccess['fdAccessApplicationAuthServerDn']->setSubmitForm('serverChanged');
-    $this->attributesAccess['fdAccessApplicationAuthType']->setSubmitForm('typeChanged');    
+    $this->attributesAccess['fdAccessApplicationAuthType']->setSubmitForm('typeChanged');
+    $this->typeChanged();
     
   }
 
@@ -490,23 +502,22 @@ class accessWebApplication extends simplePlugin
     foreach($this->applicationOptionsMapping as $key => $value){
       $selectArray[$key]=$value['label'];
     }
-    $this->attributesAccess['fdAccessApplicationSettings']->attribute->attributes[0]->setChoices(array_keys($selectArray),array_values($selectArray));
-    //$this->attributesAccess['fdAccessApplicationSettings']->attributes=$this->applicationOptionsMapping;
+    $this->attributesAccess['fdAccessApplicationSettings']->attribute->attributes[0]->setChoices(array_keys($selectArray),array_values($selectArray));  
+    // check is option value should be flush in case of protocol modification
+    // if first key isn't in option array, we flush it 
+    if (! in_array(preg_split("/;/",$this->attributesAccess['fdAccessApplicationSettings']->getValue()[0])[0],array_keys($selectArray))){
+      $this->attributesAccess['fdAccessApplicationSettings']->setValue(array());
+      
+    }
   }
    
-    
-
-    /* penser a nettoyer les vieille valeeur en cas de changement de protocole */
-
-
   }
-    /* Values */
 
 /*
 TODO
  * DONE : adapter la routind d'insertion de cofn dans LL:NG avec le mapping
- * faire une heritage de classe pour les fonction communes lemon et keycloak
- * inserer les controle de valeur
+ * DONE faire une heritage de classe pour les fonction communes lemon et keycloak
+ * DONE inserer les controle de valeur
  * sortire clientId et client Secret des options
 */
   

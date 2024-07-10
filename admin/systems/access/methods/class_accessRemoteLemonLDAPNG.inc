@@ -12,12 +12,17 @@ class accessRemoteLemonLDAPNG extends accessRemoteCommon {
     /* local mapping 
       - remotesso : name of LL::NG variable
       - validation : rule for validate entered data
-      - label : text shown in drop list    
+      - label : text shown in drop list
+      - range : values autorized or present un list
+      for LL:NG :     #https://gitlab.ow2.org/lemonldap-ng/lemonldap-ng/-/blob/v2.0/lemonldap-ng-manager/lib/Lemonldap/NG/Manager/Build/Attributes.pm
     */
     private $mappingLLNG =array(
         "COMMON" => array(),
         "CAS" => array(
-                "fdCASAuthLevel"        => array("remotesso" =>  "casAppMetaDataOptionsAuthnLevel","syntax" => "It must an integer corresponding to auth Level see : https://lemonldap-ng.org"),
+                "fdCASAuthLevel"        => array("remotesso" =>  "casAppMetaDataOptionsAuthnLevel",
+                                                 "syntax" => "It must an integer corresponding to auth Level see : https://lemonldap-ng.org",
+                                                 "range" => array("-4","5")
+                                                ),
                 "fdCASLogoutURL"        => array("remotesso" =>  "casAppMetaDataOptionsLogout","syntax" => "It must an URI"),
                 "fdCASRule"             => array("remotesso" =>  "casAppMetaDataOptionsRule"),
                 "fdCASURLService"       => array("remotesso" =>  "casAppMetaDataOptionsService"),
@@ -28,6 +33,14 @@ class accessRemoteLemonLDAPNG extends accessRemoteCommon {
                 "fdOIDCClientSecret"    => array("remotesso" =>  "oidcRPMetaDataOptionsClientSecret"),
                 "fdOIDCLogoutType"      => array("remotesso" =>  "oidcRPMetaDataOptionsLogoutType"),
                 "fdOIDCRedirectURIs"    => array("remotesso" =>  "oidcRPMetaDataOptionsRedirectUris"),
+                "fdOIDCAuthLevel"        => array("remotesso"=>  "oidcRPMetaDataOptionsAuthnLevel",
+                                                         "syntax" => "It must an integer corresponding to auth Level see : https://lemonldap-ng.org",
+                                                         "range" => array("-3","5")
+        )                                       ,
+
+                "fdOIDCServiceEncAlgo"  => array("remotesso" =>  "oidcServiceEncAlgorithmEnc", 
+                                                 "range"      => array("A256CBC-HS512","A256GCM","A192CBC-HS384","A192GCM","A128CBC-HS256","A128GCM") 
+                                               ),
                 ),
         "SAML" => array(
                 "fdSAMLIDPInitiated"    => array("remotesso" =>  "samlSPMetaDataOptionsEnableIDPInitiatedURL"),
