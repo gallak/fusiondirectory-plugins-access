@@ -119,6 +119,7 @@ class accessWebApplication extends simplePlugin
     $ldap->cd($this->fdAccessApplicationAuthServerDn);
     $ldap->search('(objectClass=fdAccessService)', ['fdAccessServiceType','fdAccessServiceURL','fdAccessServiceUser','fdAccessServicePassword']);
     $attrs = $ldap->fetch();
+    var_dump($attrs['fdAccessServiceType'][0]);
     $serviceClass="accessMethod".$attrs['fdAccessServiceType'][0];
     $this->remoteAccessHandle = new $serviceClass;
     $this->remoteAccessHandle->setConfig(array("base_url" => $attrs['fdAccessServiceURL'][0],"username" => $attrs['fdAccessServiceUser'][0], "password" => $attrs['fdAccessServicePassword'][0]));
@@ -130,6 +131,7 @@ class accessWebApplication extends simplePlugin
   function pushconfig(){
     $this->createAccessConnection();
     $jsonAppData = $this->remoteAccessHandle->generateConfig($this->generateAppData()); 
+    var_dump($jsonAppData);
     $this->remoteAccessHandle->updateApplication($this->fdAccessApplicationAuthType, $jsonAppData);
   }
 
@@ -246,12 +248,11 @@ class accessWebApplication extends simplePlugin
       }
       
       
-      
-      if ( isset($this->fdAccessApplicationSAMLMetadataFile)){
+      if ( ! empty($this->fdAccessApplicationSAMLMetadataFile)){
         $application['metadata'] = $this->fdAccessApplicationSAMLMetadataFile;
       }
       if ( isset($this->fdAccessEntityAuthority)){
-        $application['authority'] = $this->fdAccessEntityAuthority;
+        $application['options'][] = $this->applicationOptionsMapping['fdSAMLFederationEntityID']['remotesso'].";".$this->fdAccessEntityAuthority;
 
       }
       if ( isset($this->fdAccessApplicationScopeRules)){
@@ -483,7 +484,15 @@ class accessWebApplication extends simplePlugin
       $this->attributesAccess['fdAccessApplicationOIDCClientSecret']->setVisible(FALSE);
     }
   
+    if ( empty($this->fdAccessApplicationAuthServerDn)) {
+      $this->attributesAccess['fdAccessApplicationPushConfiguration']->setVisible(FALSE);
+      $this->attributesAccess['fdAccessApplicationCheckConfiguration']->setVisible(FALSE);
+      $this->attributesAccess['fdAccessApplicationImportConfiguration']->setVisible(FALSE);
+    }
     
+    
+
+
   }
 
   public function serverChanged(){
