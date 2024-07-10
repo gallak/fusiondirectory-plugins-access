@@ -1,7 +1,8 @@
 <?php
 /*
   This code is part of FusionDirectory (http://www.fusiondirectory.org/)
-  Copyright (C) 2016-2017  FusionDirectory
+  Copyright (C) 2016-2023  FusionDirectory
+
 
   This program is free software; you can redistribute it and/or modify
   it under the terms of the GNU General Public License as published by
@@ -23,11 +24,7 @@
  {
    function __construct ($label, $description, $ldapName, $acl = "")
    {
-    //var_dump($remote);
-    //var_dump(accessRemoteCommon::list_accessRemoteMethod());
-    //var_dump(parent::getParent());
-  
-    //var_dump($this->attributes);
+
 
     parent::__construct(
        $description, $ldapName,
@@ -89,7 +86,7 @@ class accessWebApplication extends simplePlugin
 
   protected $displayHeader  = TRUE;
   protected $loaded = FALSE;
-  public $protocol = "CAS";
+  //public $protocol = "CAS";
   // handle contain remote Access Management Service
   private $remoteAccessHandle;
   private $applicationOptionsMapping=array();
@@ -235,17 +232,19 @@ class accessWebApplication extends simplePlugin
         $application['macros'] = $this->fdAccessApplicationMacros;
       }
       if (! empty($this->fdAccessApplicationSettings)){
-        var_dump($this->fdAccessApplicationSettings);
-        //$application['options'] = $this->fdAccessApplicationSettings;
-        var_dump($this->applicationOptionsMapping);
         foreach ($this->fdAccessApplicationSettings as $val){
           $keyvalue=preg_split("/;/",$val);
           $application['options'][]=$this->applicationOptionsMapping[$keyvalue[0]]['remotesso'].";".$keyvalue[1];
         }
-
-
-        var_dump($application['options']);
       }
+      if (isset($this->fdAccessApplicationOIDCClientID)){
+        $application['options'][]=$this->applicationOptionsMapping['fdOIDCClientID']['remotesso'].";".$this->fdAccessApplicationOIDCClientID;
+      }
+
+      if (isset($this->fdAccessApplicationOIDCClientSecret)){
+        $application['options'][]=$this->applicationOptionsMapping['fdOIDCClientSecret']['remotesso'].";".$this->fdAccessApplicationOIDCClientSecret;
+      }
+      
       
       
       if ( isset($this->fdAccessApplicationSAMLMetadataFile)){
@@ -280,7 +279,7 @@ class accessWebApplication extends simplePlugin
         'attrs' => [
           new SelectAttribute(
             _('Authentification Type'), _('Type of Authentification'),
-             'fdAccessApplicationAuthType', TRUE,['OIDC','SAML','CAS','HEADER'],'',['OIDC','SAML','CAS','HEADER']),
+             'fdAccessApplicationAuthType', TRUE,['OIDC','SAML','CAS'],'',['OIDC','SAML','CAS']),
           new SelectAttribute(
               _('type'), _('Type'),
               'fdAccessEntityType', FALSE,["IDP","SP"],"IDP",["IDP","SP"]),
@@ -291,12 +290,23 @@ class accessWebApplication extends simplePlugin
               _('Authentification server'), _('Authentification server'),
               'fdAccessApplicationAuthServerDn'
               ),
+          // dedicated OIDC
+          new StringAttribute(
+                _('Client ID'), _('Client ID'),
+                'fdAccessApplicationOIDCClientID', FALSE),
+          // dedicated OIDC
+          new StringAttribute(
+                  _('Client Secret'), _('Client Secret'),
+                  'fdAccessApplicationOIDCClientSecret', FALSE),
+          // dedicated SAML
           new StringAttribute(
               _('Organization'), _('Organization'),
               'o', FALSE),
+          // dedicated SAML
           new StringAttribute(
               _('Technical Contact'), _('Technical Contact'),
               'mail', FALSE),
+          // dedicated SAML
           new FileTextAreaAttribute(
               _('SAML Metadata File'), _('SAML Metadata File'),
               'fdAccessApplicationSAMLMetadataFile', FALSE
@@ -443,6 +453,9 @@ class accessWebApplication extends simplePlugin
       $this->attributesAccess['mail']->setVisible(TRUE);
       $this->attributesAccess['fdAccessApplicationService']->setVisible(FALSE);
       $this->attributesAccess['fdAccessEntityType']->setVisible(TRUE);
+      $this->attributesAccess['fdAccessApplicationOIDCClientID']->setVisible(FALSE);
+      $this->attributesAccess['fdAccessApplicationOIDCClientSecret']->setVisible(FALSE);
+
     }else{
       $this->attributesAccess['fdAccessApplicationSAMLMetadataFile']->setVisible(FALSE);
       $this->attributesAccess['fdAccessApplicationService']->setVisible(TRUE);
@@ -457,7 +470,8 @@ class accessWebApplication extends simplePlugin
       $this->attributesAccess['fdAccessApplicationScopeRules']->setVisible(TRUE);
       $this->attributesAccess['fdAccessApplicationService']->setVisible(TRUE);
       $this->attributesAccess['fdAccessEntityType']->setVisible(FALSE);
-
+      $this->attributesAccess['fdAccessApplicationOIDCClientID']->setVisible(TRUE);
+      $this->attributesAccess['fdAccessApplicationOIDCClientSecret']->setVisible(TRUE);
       $this->attributesAccess['fdAccessApplicationSAMLMetadataFile']->setVisible(FALSE);
       $this->attributesAccess['fdAccessEntityAuthority']->setVisible(FALSE);
       $this->attributesAccess['o']->setVisible(FALSE);
@@ -465,6 +479,8 @@ class accessWebApplication extends simplePlugin
 
     }else{
       $this->attributesAccess['fdAccessApplicationScopeRules']->setVisible(FALSE);
+      $this->attributesAccess['fdAccessApplicationOIDCClientID']->setVisible(FALSE);
+      $this->attributesAccess['fdAccessApplicationOIDCClientSecret']->setVisible(FALSE);
     }
   
     
@@ -479,7 +495,7 @@ class accessWebApplication extends simplePlugin
     parent::__construct($dn, $object, $parent, $mainTab);
     
   
-    $this->typeAuthentification=array('OIDC','SAML','CAS','HEADER');
+    $this->typeAuthentification=array('OIDC','SAML','CAS');
     $this->attributesAccess['fdAccessApplicationAuthType']->setChoices($this->typeAuthentification);
     $this->attributesAccess['fdAccessApplicationAuthServerDn']->setSubmitForm('serverChanged');
     $this->attributesAccess['fdAccessApplicationAuthType']->setSubmitForm('typeChanged');
@@ -505,10 +521,10 @@ class accessWebApplication extends simplePlugin
     $this->attributesAccess['fdAccessApplicationSettings']->attribute->attributes[0]->setChoices(array_keys($selectArray),array_values($selectArray));  
     // check is option value should be flush in case of protocol modification
     // if first key isn't in option array, we flush it 
-    if (! in_array(preg_split("/;/",$this->attributesAccess['fdAccessApplicationSettings']->getValue()[0])[0],array_keys($selectArray))){
-      $this->attributesAccess['fdAccessApplicationSettings']->setValue(array());
-      
-    }
+    // FIXME : when deleting one value all value are flush ....
+    //if (! in_array(preg_split("/;/",$this->attributesAccess['fdAccessApplicationSettings']->getValue()[0])[0],array_keys($selectArray))){
+    //  $this->attributesAccess['fdAccessApplicationSettings']->setValue(array());
+    // }
   }
    
   }
