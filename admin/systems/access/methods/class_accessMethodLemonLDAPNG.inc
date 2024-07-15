@@ -19,7 +19,6 @@ class accessMethodLemonLDAPNG {
         "SAML" => "samlSPMetaData"
     );
 
-
     // retrun all option per protocol
     public function getRemoteAccessServerMapping($protocol){
         $handle= new accessRemoteLemonLDAPNG($conf);
@@ -94,11 +93,6 @@ class accessMethodLemonLDAPNG {
         $handle=new accessRemoteLemonLDAPNG($this->serviceConfig);
         $res=$handle->$getfct($appConfKey);
         return($res);
-        /*if ( preg_match("/^4..$/",$res['code'])){
-          msg_dialog::display(_($type." application error"), sprintf(_("An error occurs during saving application. <br> %s <br> Detailed error : <br> %s"),$res['msg'],$res['data']['error']),ERROR_DIALOG);
-        }else{
-          msg_dialog::display(_($type." application information"), sprintf(_("Application %s exists"),$appConfKey,),INFO_DIALOG);
-        }*/
     
     }
 
@@ -118,20 +112,10 @@ class accessMethodLemonLDAPNG {
         foreach($res['data']['macros'] as $key => $value){
             $arrayMacros[]=$key.";".$value;
         }        
-
-        //var_dump($arrayScopeRule);
-        //$imported['fdAccessApplicationScopeRules']=$arrayScopeRule;
         
         $imported['macros']=$arrayMacros;
         //return($imported);
         return($imported);
-        //$format['fdAccessApplicationScopeRules']=$res['data']['scopeRules']
-        //return($res['data']);
-        /*if ( preg_match("/^4..$/",$res['code'])){
-          msg_dialog::display(_($type." application error"), sprintf(_("An error occurs during saving application. <br> %s <br> Detailed error : <br> %s"),$res['msg'],$res['data']['error']),ERROR_DIALOG);
-        }else{
-          msg_dialog::display(_($type." application information"), sprintf(_("Application %s exists"),$appConfKey,),INFO_DIALOG);
-        }*/
     
     }
 
@@ -144,6 +128,7 @@ class accessMethodLemonLDAPNG {
         if ($this->ifExistApplication($type,json_decode($content)->confKey)){
             $res=$this->replaceApplication($type,$content);
         }else{
+            var_dump($content);
             $res=$this->addApplication($type,$content);
         }
         if ( preg_match("/^4..$/",$res['code'])){
@@ -171,9 +156,11 @@ class accessMethodLemonLDAPNG {
         
         $service=array();
         // bug exportVars for cas and OIDC axportedAttributes for saml put it in dedicated portion code
-        $llngapp=array('confKey'=> $appConfig['appname'], "macros" => $appConfig['macro'], "options" => array());
+        $llngapp=array('confKey'=> $appConfig['appname'], "macros" => $appConfig['macro']); //, "options" => array());
         $options_array=array("service","RedirectUris");
         $optionnal_config_keys=array("macros", "options");
+
+        $mappingConfig=$this->getRemoteAccessServerMapping($appConfig['auth']['type']);
 
         // set macros
         foreach($appConfig['macros'] as $macro_infos) {
@@ -181,13 +168,19 @@ class accessMethodLemonLDAPNG {
             $llngapp['macros'][$array_macro[0]]=$array_macro[1];
           }
         //set options
-        foreach($appConfig['options'] as $settings_infos) {
+        var_dump($appConfig['settings']);
+        foreach($appConfig['settings'] as $settings_infos) {
             $array_settings=preg_split("/;/", $settings_infos);
             // convert LL:NG internal value to API value ex : oidcRPMetaDataOptionRedirectUris  => redirectUris
-            $sub="/^".$this->mapping[$appConfig['type']]."Options/";
+            $sub="/^".$this->mapping[$appConfig['auth']['type']]."Options/";
             // remote options seems to be case Sensitive
-            $newkey=lcfirst(preg_replace($sub,"",$array_settings[0]));
+
+            $llng_field=$mappingConfig[$array_settings[0]]['remotesso'];
+            var_dump($llng_field);
+
+            $newkey=lcfirst(preg_replace($sub,"",$llng_field));
             // take care of multivaluated variables
+            
             if ( in_array($newkey,  $options_array )){
                 if ( $llngapp['options'][$newkey] == null ){
                     $llngapp['options'][$newkey]=array($array_settings[1]);   
@@ -197,14 +190,15 @@ class accessMethodLemonLDAPNG {
             }else{
                 $llngapp['options'][$newkey]=$array_settings[1];
             }
+            $llngapp['options'][$llng_field]=$array_settings[1];
               
         } 
 
         // configuration manipulation for CAS method        
-        if ( $appConfig['type']== "CAS"){
+        if ( $appConfig['auth']['type']== "CAS"){
             $llng['exportedVars']=array();
             // set Service URI
-            $llngapp['options']['service']=$appConfig['service'];
+            $llngapp['options']['service']=$appConfig['auth']['service'];
             // set attributes
             foreach( $appConfig['attributes'] as $key => $value){
                 $llngapp['exportedVars'][$key]=$value['friendlyName'];
@@ -213,7 +207,7 @@ class accessMethodLemonLDAPNG {
                
         }
         // configuration manipulation for SAML method
-        if ( $appConfig['type']== "SAML"){
+        if ( $appConfig['auth']['type']== "SAML"){
             
             $llng['exportedAttributes']=array();
             // set attributes
@@ -229,24 +223,27 @@ class accessMethodLemonLDAPNG {
             }
 
             //set metadata
-            if (isset($appConfig['metadata'])){
-                $llngapp['metadata']=$appConfig['metadata'];
-            }
-            if ($appConfig['authority']){
-                $llngapp['options']['FederationEntityID']=$appConfig['authority'];
+            if (isset($appConfig['auth']['metadata'])){
+                $llngapp['metadata']=$appConfig['auth']['metadata'];
             }
                
         }
 
         // configuration manipulation for OIDC method        
-        if ( $appConfig['type']== "OIDC"){
+        if ( $appConfig['auth']['type']== "OIDC"){
             $llng['exportedVars']=array();
             // add extraClaim
             $scopeArray=array();
-            // move options why ????
-            $llngapp['clientId'] = $llngapp['options']['clientID'];
-            $llngapp['redirectUris'] = $appConfig['service'];
-            unset($llngapp['options']['service']);
+
+            // Set dedicated settings redirectUris / clientId
+            $llngapp['redirectUris'] = $appConfig['auth']['service'];
+            $llngapp['clientId'] = $appConfig['auth']['clientId'];
+            // set settings clientSecret
+            if (! empty($appConfig['auth']['clientSecret'])){
+                $llngapp['options']['clientSecret']=$appConfig['auth']['clientSecret'];
+            }
+
+            //unset($llngapp['options']['service']);
             // add attribute
             foreach( $appConfig['attributes'] as $key => $value){
                 //var_dump($value);
@@ -260,11 +257,13 @@ class accessMethodLemonLDAPNG {
                     
                 }
             }
+            // add extraClaims
             if (!empty($scopeArray)){
                 $llngapp['extraClaims']=$scopeArray;
-                $llngapp['options']['extraClaims']=$scopeArray;
+                //$llngapp['options']['extraClaims']=$scopeArray;
             }
             // /!\ en cas de replace , les valeurs sont mergée !!!  BUG ??????
+            // add scopeRules
             if ($appConfig['scopeRules']){
                 //var_dump($appConfig['scopeRules']);
                 foreach( $appConfig['scopeRules'] as $value){
@@ -277,7 +276,6 @@ class accessMethodLemonLDAPNG {
         
         }
 
-        //var_dump($llngapp);
         
         //clean empty values
         foreach($optionnal_config_keys as $opt){
@@ -285,6 +283,7 @@ class accessMethodLemonLDAPNG {
                 unset($llngapp[$opt]);
             }    
         }
+        var_dump($llngapp);
         return(json_encode($llngapp));
     }
 

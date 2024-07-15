@@ -226,39 +226,35 @@ class accessWebApplication extends simplePlugin
       //fetch app name
       $application['appname']=$this->parent->getBaseObject()->cn;
       //fetch auth type
-      $application['type']=$this->fdAccessApplicationAuthType;
+      $application['auth']=array('type' => $this->fdAccessApplicationAuthType);
       // fetch macros
 
       if ( ! empty($this->fdAccessApplicationMacros)){
         $application['macros'] = $this->fdAccessApplicationMacros;
       }
+
+
       if (! empty($this->fdAccessApplicationSettings)){
-        foreach ($this->fdAccessApplicationSettings as $val){
-          $keyvalue=preg_split("/;/",$val);
-          $application['options'][]=$this->applicationOptionsMapping[$keyvalue[0]]['remotesso'].";".$keyvalue[1];
-        }
-      }
-      if (! empty($this->fdAccessApplicationOIDCClientID)){
-        $application['options'][]=$this->applicationOptionsMapping['fdOIDCClientID']['remotesso'].";".$this->fdAccessApplicationOIDCClientID;
+        $application['settings'] = $this->fdAccessApplicationSettings;
       }
 
-      if (! empty($this->fdAccessApplicationOIDCClientSecret)){
-        $application['options'][]=$this->applicationOptionsMapping['fdOIDCClientSecret']['remotesso'].";".$this->fdAccessApplicationOIDCClientSecret;
+      if (! empty($this->fdAccessApplicationOIDCClientID)){
+        $application['auth']['clientId']=$this->fdAccessApplicationOIDCClientID;
       }
-      
+      if (! empty($this->fdAccessApplicationOIDCClientSecret)){
+        $application['auth']['clientSecret']=$this->fdAccessApplicationOIDCClientSecret;
+      }
       
       if ( ! empty($this->fdAccessApplicationSAMLMetadataFile)){
-        $application['metadata'] = $this->fdAccessApplicationSAMLMetadataFile;
+        $application['auth']['metadata'] = $this->fdAccessApplicationSAMLMetadataFile;
       }
-      if ( ! empty($this->fdAccessEntityAuthority)){
-        $application['options'][] = $this->applicationOptionsMapping['fdSAMLFederationEntityID']['remotesso'].";".$this->fdAccessEntityAuthority;
 
+      if ( ! empty($this->fdAccessEntityAuthority)){
+        $application['auth']['entityAuthority']=$this->fdAccessEntityAuthority;
       }
-      if ( ! empty($this->fdAccessApplicationScopeRules)){
-        $application['scopeRules'] = $this->fdAccessApplicationScopeRules;
-      }
+
       // add service URI
-      $application['service']=$this->fdAccessApplicationService;
+      $application['auth']['service']=$this->fdAccessApplicationService;
 
       return($application);
 
