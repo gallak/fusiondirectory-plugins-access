@@ -168,7 +168,6 @@ class accessMethodLemonLDAPNG {
             $llngapp['macros'][$array_macro[0]]=$array_macro[1];
           }
         //set options
-        var_dump($appConfig['settings']);
         foreach($appConfig['settings'] as $settings_infos) {
             $array_settings=preg_split("/;/", $settings_infos);
             // convert LL:NG internal value to API value ex : oidcRPMetaDataOptionRedirectUris  => redirectUris
@@ -193,6 +192,10 @@ class accessMethodLemonLDAPNG {
             $llngapp['options'][$llng_field]=$array_settings[1];
               
         } 
+
+        // set description
+
+        $llngapp['options']['comment'] = $appConfig['description'];
 
         // configuration manipulation for CAS method        
         if ( $appConfig['auth']['type']== "CAS"){

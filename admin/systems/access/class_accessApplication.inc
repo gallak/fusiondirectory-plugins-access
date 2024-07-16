@@ -86,7 +86,7 @@ class accessWebApplication extends simplePlugin
 
   protected $displayHeader  = TRUE;
   protected $loaded = FALSE;
-  //public $protocol = "CAS";
+
   // handle contain remote Access Management Service
   private $remoteAccessHandle;
   private $applicationOptionsMapping=array();
@@ -222,6 +222,10 @@ class accessWebApplication extends simplePlugin
 
 
       }
+      // build description
+      $ui = get_userinfo();
+      $today = date("d / m / y h:i");
+      $application['description'] = $this->parent->getBaseObject()->description."  / Modified by ".$ui->uid. " on ".$today;
 
       //fetch app name
       $application['appname']=$this->parent->getBaseObject()->cn;
@@ -479,11 +483,7 @@ class accessWebApplication extends simplePlugin
       $this->attributesAccess['fdAccessApplicationOIDCClientSecret']->setVisible(FALSE);
     }
   
-    if ( empty($this->fdAccessApplicationAuthServerDn)) {
-      $this->attributesAccess['fdAccessApplicationPushConfiguration']->setVisible(FALSE);
-      $this->attributesAccess['fdAccessApplicationCheckConfiguration']->setVisible(FALSE);
-      $this->attributesAccess['fdAccessApplicationImportConfiguration']->setVisible(FALSE);
-    }
+
     
     
 
@@ -492,6 +492,17 @@ class accessWebApplication extends simplePlugin
 
   public function serverChanged(){
     $this->fdAccessApplicationAuthServerDn = $this->attributesAccess['fdAccessApplicationAuthServerDn']->getValue();
+    
+    if ( empty($this->fdAccessApplicationAuthServerDn)) {
+      var_dump( $this->fdAccessApplicationAuthServerDn);
+      $this->attributesAccess['fdAccessApplicationPushConfiguration']->setVisible(FALSE);
+      $this->attributesAccess['fdAccessApplicationCheckConfiguration']->setVisible(FALSE);
+      $this->attributesAccess['fdAccessApplicationImportConfiguration']->setVisible(FALSE);
+    }else{
+      $this->attributesAccess['fdAccessApplicationPushConfiguration']->setVisible(TRUE);
+      $this->attributesAccess['fdAccessApplicationCheckConfiguration']->setVisible(TRUE);
+      $this->attributesAccess['fdAccessApplicationImportConfiguration']->setVisible(TRUE);
+    }
   }
 
   function __construct ($dn = NULL, $object = NULL, $parent = NULL, $mainTab = FALSE)
@@ -504,6 +515,8 @@ class accessWebApplication extends simplePlugin
     $this->attributesAccess['fdAccessApplicationAuthServerDn']->setSubmitForm('serverChanged');
     $this->attributesAccess['fdAccessApplicationAuthType']->setSubmitForm('typeChanged');
     $this->typeChanged();
+    $this->serverChanged();
+    
     
   }
 
@@ -533,13 +546,6 @@ class accessWebApplication extends simplePlugin
    
   }
 
-/*
-TODO
- * DONE : adapter la routind d'insertion de cofn dans LL:NG avec le mapping
- * DONE faire une heritage de classe pour les fonction communes lemon et keycloak
- * DONE inserer les controle de valeur
- * sortire clientId et client Secret des options
-*/
   
   public function update (): bool
   {
