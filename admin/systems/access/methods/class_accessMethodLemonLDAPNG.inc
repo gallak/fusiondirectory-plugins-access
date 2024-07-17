@@ -286,7 +286,6 @@ class accessMethodLemonLDAPNG {
                 unset($llngapp[$opt]);
             }    
         }
-        var_dump($llngapp);
         return(json_encode($llngapp));
     }
 

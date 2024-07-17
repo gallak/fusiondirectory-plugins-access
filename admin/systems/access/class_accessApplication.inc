@@ -124,13 +124,9 @@ class accessWebApplication extends simplePlugin
     $this->remoteAccessHandle->setConfig(array("base_url" => $attrs['fdAccessServiceURL'][0],"username" => $attrs['fdAccessServiceUser'][0], "password" => $attrs['fdAccessServicePassword'][0]));
   }
 
-  #FIXME : add Federation rattachement when import config 
-  #FIXME : add description filed with date and author
-
   function pushconfig(){
     $this->createAccessConnection();
     $jsonAppData = $this->remoteAccessHandle->generateConfig($this->generateAppData()); 
-    var_dump($jsonAppData);
     $this->remoteAccessHandle->updateApplication($this->fdAccessApplicationAuthType, $jsonAppData);
   }
 
@@ -228,7 +224,11 @@ class accessWebApplication extends simplePlugin
       $application['description'] = $this->parent->getBaseObject()->description."  / Modified by ".$ui->uid. " on ".$today;
 
       //fetch app name
-      $application['appname']=$this->parent->getBaseObject()->cn;
+      if (! empty($this->fdAccessApplicationConfKey)){
+        $application['appname']=$this->fdAccessApplicationConfKey;
+      }else {
+        $application['appname']=$this->parent->getBaseObject()->cn;
+      }
       //fetch auth type
       $application['auth']=array('type' => $this->fdAccessApplicationAuthType);
       // fetch macros
@@ -277,6 +277,10 @@ class accessWebApplication extends simplePlugin
       'accessApplication' => [
         'name'  => _('Common component'),
         'attrs' => [
+
+          new StringAttribute(
+            _('Configuration Key'), _('Config Key, if not set cn is taken'),
+            'fdAccessApplicationConfKey', FALSE),
           new SelectAttribute(
             _('Authentification Type'), _('Type of Authentification'),
              'fdAccessApplicationAuthType', TRUE,['OIDC','SAML','CAS'],'',['OIDC','SAML','CAS']),
