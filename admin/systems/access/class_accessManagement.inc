@@ -22,7 +22,7 @@
 class accessManagement extends management
 {
 
-  // template systeme activation
+  // template system activation
   public static $skipTemplates = FALSE;
 
   public static function plInfo (): array
@@ -34,7 +34,7 @@ class accessManagement extends management
       'plIcon'        => 'geticon.php?context=applications&icon=access&size=48',
       'plSection'     => 'systems',
       'plPriority'    => 55,
-      'plManages'     => ['federation', 'attributes','samlEntity','webApplication'],
+      'plManages'     => ['federation', 'attributes','webApplication'],
     ];
   }
 }

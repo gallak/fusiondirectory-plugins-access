@@ -87,22 +87,7 @@ attributetype ( 1.3.6.1.4.1.38414.142.5.7 NAME 'fdFederationURL'
         EQUALITY caseIgnoreIA5Match
         SUBSTR caseIgnoreSubstringsMatch
         SYNTAX 1.3.6.1.4.1.1466.115.121.1.26
-        SINGLE-VALUE )
-
-attributetype ( 1.3.6.1.4.1.38414.142.5.8 NAME 'fdAccessEntityAuthority'
-        DESC 'FusionDirectory - Access IDP SP Federation Authority'
-        EQUALITY caseIgnoreIA5Match
-        SUBSTR caseIgnoreSubstringsMatch
-        SYNTAX 1.3.6.1.4.1.1466.115.121.1.26
-        SINGLE-VALUE )
-
-attributetype ( 1.3.6.1.4.1.38414.142.5.9 NAME 'fdAccessEntityType'
-        DESC 'FusionDirectory - Access IDP SP Federation Authority'
-        EQUALITY caseIgnoreIA5Match
-        SUBSTR caseIgnoreSubstringsMatch
-        SYNTAX 1.3.6.1.4.1.1466.115.121.1.26
-        SINGLE-VALUE )
-        
+        SINGLE-VALUE )        
 
 
 attributetype ( 1.3.6.1.4.1.38414.142.5.10 NAME 'fdAccessApplicationMacros'
@@ -180,10 +165,3 @@ objectclass (1.3.6.1.4.1.38414.142.4.3 NAME 'fdAccessFederation'
         DESC 'FusionDirectory - Federation Declaration'
         MUST (cn $ fdFederationURL )
         MAY (description $ fdAccessFederationMandatoryAttribute $ fdAccessFederationOptionalAttribute $ fdAccessApplicationAuthServerDn))
-
-
-
-objectclass (1.3.6.1.4.1.38414.142.4.4 NAME 'fdAccessIdpSp'
-        DESC 'FusionDirectory - IDP an SP Declaration'
-        MUST (cn $ fdAccessEntityAuthority $ fdAccessEntityType $ o $ mail)
-        MAY (description))
