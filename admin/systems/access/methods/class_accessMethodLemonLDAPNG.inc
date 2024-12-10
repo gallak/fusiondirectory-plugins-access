@@ -175,7 +175,6 @@ class accessMethodLemonLDAPNG {
             // remote options seems to be case Sensitive
 
             $llng_field=$mappingConfig[$array_settings[0]]['remotesso'];
-            var_dump($llng_field);
 
             $newkey=lcfirst(preg_replace($sub,"",$llng_field));
             // take care of multivaluated variables
@@ -189,7 +188,7 @@ class accessMethodLemonLDAPNG {
             }else{
                 $llngapp['options'][$newkey]=$array_settings[1];
             }
-            $llngapp['options'][$llng_field]=$array_settings[1];
+            //$llngapp['options'][$llng_field]=$array_settings[1];
               
         } 
 

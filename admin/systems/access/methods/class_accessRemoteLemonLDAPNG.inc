@@ -35,8 +35,7 @@ class accessRemoteLemonLDAPNG extends accessRemoteCommon {
                 "fdOIDCRedirectURIs"    => array("remotesso" =>  "oidcRPMetaDataOptionsRedirectUris"),
                 "fdOIDCAuthLevel"        => array("remotesso"=>  "oidcRPMetaDataOptionsAuthnLevel",
                                                          "syntax" => "It must an integer corresponding to auth Level see : https://lemonldap-ng.org",
-                                                         "range" => array("-3","5")
-        )                                       ,
+                                                         "range" => array("-3","5"))                                       ,
 
                 "fdOIDCServiceEncAlgo"  => array("remotesso" =>  "oidcServiceEncAlgorithmEnc", 
                                                  "range"      => array("A256CBC-HS512","A256GCM","A192CBC-HS384","A192GCM","A128CBC-HS256","A128GCM") 
@@ -47,7 +46,10 @@ class accessRemoteLemonLDAPNG extends accessRemoteCommon {
                 "fdSAMLSignSLO"         => array("remotesso" =>  "samlSPMetaDataOptionsSignSLOMessage"),
                 "fdSAMLSignSSO"         => array("remotesso" =>  "samlSPMetaDataOptionsSignSSOMessage"),
                 "fdSAMLSignatureMethod" => array("remotesso" =>  "samlSPMetaDataOptionsSignatureMethod"),
-                "fdSAMLFederationEntityID" => array("remotesso" =>  "samlSPMetaDataOptionsFederationEntityID", "syntax" => "It must be an URL")
+                "fdSAMLFederationEntityID" => array("remotesso" =>  "samlSPMetaDataOptionsFederationEntityID", "syntax" => "It must be an URL",'validation'=> 'is_string'),
+                "fdSAMLFederationOptionalAttributes" => array("remotesso" =>  "samlSPMetaDataOptionsFederationOptionalAttributes", "syntax" => "It must be an boolean",'validation'=> 'is_string'),
+                "fdSAMLFederationMandatoryAttributes" => array("remotesso" =>  "samlSPMetaDataOptionsFederationRequiredAttributes", "syntax" => "It must be an boolean",'validation'=> 'is_string'),
+                        
         ),
 
     );

@@ -21,3 +21,50 @@ métier
 ajouter et supprime
 
 
+/!\ usage de branche :
+agallavardi@LGA-LYPSI02:~/Documents/GIT/GITHUB/fusiondirectory-plugins-access$ git branch
+* main
+agallavardi@LGA-LYPSI02:~/Documents/GIT/GITHUB/fusiondirectory-plugins-access$ git branch "rm_dep_taxonomy"
+agallavardi@LGA-LYPSI02:~/Documents/GIT/GITHUB/fusiondirectory-plugins-access$ git branch
+* main
+  rm_dep_taxonomy
+agallavardi@LGA-LYPSI02:~/Documents/GIT/GITHUB/fusiondirectory-plugins-access$ git checkout rm_dep_taxonomy
+Basculement sur la branche 'rm_dep_taxonomy'
+agallavardi@LGA-LYPSI02:~/Documents/GIT/GITHUB/fusiondirectory-plugins-access$ git branch
+  main
+* rm_dep_taxonomy
+agallavardi@LGA-LYPSI02:~/Documents/GIT/GITHUB/fusiondirectory-plugins-access$ 
+
+
+
+Fusion de la branche
+voir : https://www.ionos.fr/digitalguide/sites-internet/developpement-web/git-merge-et-branch/
+agallavardi@LGA-LYPSI02:~/Documents/GIT/GITHUB/fusiondirectory-plugins-access$ git branch
+  main
+* rm_dep_taxonomy
+
+agallavardi@LGA-LYPSI02:~/Documents/GIT/GITHUB/fusiondirectory-plugins-access$ git checkout main
+M	TODO
+Basculement sur la branche 'main'
+Votre branche est à jour avec 'origin/main'.
+agallavardi@LGA-LYPSI02:~/Documents/GIT/GITHUB/fusiondirectory-plugins-access$ git branch
+* main
+  rm_dep_taxonomy
+
+
+agallavardi@LGA-LYPSI02:~/Documents/GIT/GITHUB/fusiondirectory-plugins-access$ git checkout main
+M	TODO
+Basculement sur la branche 'main'
+Votre branche est à jour avec 'origin/main'.
+agallavardi@LGA-LYPSI02:~/Documents/GIT/GITHUB/fusiondirectory-plugins-access$ git branch
+* main
+  rm_dep_taxonomy
+
+  agallavardi@LGA-LYPSI02:~/Documents/GIT/GITHUB/fusiondirectory-plugins-access$ git branch -d 
+main              rm_dep_taxonomy   
+agallavardi@LGA-LYPSI02:~/Documents/GIT/GITHUB/fusiondirectory-plugins-access$ git branch -d rm_dep_taxonomy 
+Branche rm_dep_taxonomy supprimée (précédemment 7c8a123).
+agallavardi@LGA-LYPSI02:~/Documents/GIT/GITHUB/fusiondirectory-plugins-access$ git branch 
+* main
+
+

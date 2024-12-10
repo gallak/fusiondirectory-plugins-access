@@ -224,7 +224,7 @@ class federationEntities {
 class federation extends simplePlugin
 {
 
-  protected $displayHeader  = TRUE;
+  protected $displayHeader  = FALSE;
   protected $loaded = FALSE;
   private $remoteAccessHandle;
 
@@ -306,16 +306,20 @@ class federation extends simplePlugin
 
     $application=array();
 
+    $federationObject = new federationEntities($this->fdFederationURL);
+
     //fetch app name
     $application['appname']=$this->parent->getBaseObject()->cn;
-    $application['type']="SAML";
-    $application['options']=array();
+    $application['auth']['type']="SAML";
+    $application['settings']=array();
 
-    $application['options'][]="FederationRequiredAttributes;".$this->fdAccessFederationMandatoryAttribute;
-    $application['options'][]="FederationOptionalAttributes;".$this->fdAccessFederationOptionalAttribute;
-    $application['options'][]="FederationEntityID;"."https://federation.id.fr";
-    $application['macros']=array();
-    #BUG ?? metadaare mandatory but Federation didn't have metadata
+    $application['settings'][]="fdSAMLFederationMandatoryAttributes;".$this->fdAccessFederationMandatoryAttribute;
+    $application['settings'][]="fdSAMLFederationOptionalAttributes;".$this->fdAccessFederationOptionalAttribute;
+    $application['settings'][]="fdSAMLFederationEntityID;".$federationObject->getMetadataAuthority();
+    
+    $ui = get_userinfo();
+    $today = date("d / m / y h:i");
+    $application['description'] = $this->description."  / Modified by ".$ui->uid. " on ".$today;
     return($application);
 
 
@@ -329,10 +333,13 @@ class federation extends simplePlugin
   function pushconfig(){
     $this->createAccessConnection();
     $appData=$this->generateAppData();
-    //var_dump($appData['type']);
-    $jsonAppData = $this->remoteAccessHandle->generateConfig($appData); 
-    var_dump($jsonAppData);
-    $this->remoteAccessHandle->updateApplication($appData['type'], $jsonAppData);
+    if ( ! empty($this->fdAccessApplicationAuthServerDn)){
+      //$this->applicationOptionsMapping=$this->remoteAccessHandle->getRemoteAccessServerMapping($appData['auth']['type']);
+      var_dump($appData);
+      $jsonAppData = $this->remoteAccessHandle->generateConfig($appData); 
+      var_dump($jsonAppData);
+      $this->remoteAccessHandle->updateApplication($appData['auth']['type'], $jsonAppData);
+    }
   }
 
   //FIXME : add button to push federation declration insode LEMONLDAP
