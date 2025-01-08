@@ -19,43 +19,85 @@ class accessRemoteLemonLDAPNG extends accessRemoteCommon {
     private $mappingLLNG =array(
         "COMMON" => array(),
         "CAS" => array(
-                "fdCASAuthLevel"        => array("remotesso" =>  "casAppMetaDataOptionsAuthnLevel",
-                                                 "syntax" => "It must an integer corresponding to auth Level see : https://lemonldap-ng.org",
-                                                 "range" => array("-4","5")
-                                                ),
-                "fdCASLogoutURL"        => array("remotesso" =>  "casAppMetaDataOptionsLogout","syntax" => "It must an URI"),
-                "fdCASRule"             => array("remotesso" =>  "casAppMetaDataOptionsRule"),
-                "fdCASURLService"       => array("remotesso" =>  "casAppMetaDataOptionsService"),
-                "fdCASUserAttribute"    => array("remotesso" =>  "casAppMetaDataOptionsUserAttribute"),
+                "fdCASAuthLevel"        => array(
+                        "remotesso" =>  "casAppMetaDataOptionsAuthnLevel",
+                        "syntax" => "It must an integer corresponding to auth Level see : https://lemonldap-ng.org",
+                        "range" => array("-4","5")
+                        ),
+                "fdCASLogoutURL"        => array(
+                        "remotesso" =>  "casAppMetaDataOptionsLogout",
+                        "syntax" => "It must an URI"
+                        ),
+                "fdCASRule"             => array(
+                        "remotesso" =>  "casAppMetaDataOptionsRule"
+                        ),
+/*                "fdCASURLService"       => array(
+                        "remotesso" =>  "casAppMetaDataOptionsService"
+                        ),*/
+                "fdCASUserAttribute"    => array(
+                        "remotesso" =>  "casAppMetaDataOptionsUserAttribute"
+                        ),
                 ),
         "OIDC" => array(
-                "fdOIDCClientID"        => array("remotesso" =>  "oidcRPMetaDataOptionsClientID","syntax" => "It must an string see : https://lemonldap-ng.org"),
-                "fdOIDCClientSecret"    => array("remotesso" =>  "oidcRPMetaDataOptionsClientSecret"),
-                "fdOIDCLogoutType"      => array("remotesso" =>  "oidcRPMetaDataOptionsLogoutType"),
-                "fdOIDCRedirectURIs"    => array("remotesso" =>  "oidcRPMetaDataOptionsRedirectUris"),
-                "fdOIDCAuthLevel"        => array("remotesso"=>  "oidcRPMetaDataOptionsAuthnLevel",
-                                                         "syntax" => "It must an integer corresponding to auth Level see : https://lemonldap-ng.org",
-                                                         "range" => array("-3","5"))                                       ,
-
-                "fdOIDCServiceEncAlgo"  => array("remotesso" =>  "oidcServiceEncAlgorithmEnc", 
-                                                 "range"      => array("A256CBC-HS512","A256GCM","A192CBC-HS384","A192GCM","A128CBC-HS256","A128GCM") 
-                                               ),
+/*                "fdOIDCClientID"        => array(
+                        "remotesso" =>  "oidcRPMetaDataOptionsClientID",
+                        "syntax" => "It must an string see : https://lemonldap-ng.org"
+                        ),
+                "fdOIDCClientSecret"    => array(
+                        "remotesso" =>  "oidcRPMetaDataOptionsClientSecret"
+                        ),*/
+                "fdOIDCLogoutType"      => array(
+                        "remotesso" =>  "oidcRPMetaDataOptionsLogoutType"
+                        ),
+/*                "fdOIDCRedirectURIs"    => array(
+                        "remotesso" =>  "oidcRPMetaDataOptionsRedirectUris"
+                        ),*/
+                "fdOIDCAuthLevel"        => array(
+                        "remotesso"=>  "oidcRPMetaDataOptionsAuthnLevel",
+                        "syntax" => "It must an integer corresponding to auth Level see : https://lemonldap-ng.org",
+                        "range" => array("-3","5")
+                        ),
+                "fdOIDCServiceEncAlgo"  => array(
+                        "remotesso" =>  "oidcServiceEncAlgorithmEnc", 
+                        "range"      => array("A256CBC-HS512","A256GCM","A192CBC-HS384","A192GCM","A128CBC-HS256","A128GCM") 
+                        ),
                 ),
         "SAML" => array(
-                "fdSAMLIDPInitiated"    => array("remotesso" =>  "samlSPMetaDataOptionsEnableIDPInitiatedURL"),
-                "fdSAMLSignSLO"         => array("remotesso" =>  "samlSPMetaDataOptionsSignSLOMessage"),
-                "fdSAMLSignSSO"         => array("remotesso" =>  "samlSPMetaDataOptionsSignSSOMessage"),
-                "fdSAMLSignatureMethod" => array("remotesso" =>  "samlSPMetaDataOptionsSignatureMethod"),
-                "fdSAMLFederationEntityID" => array("remotesso" =>  "samlSPMetaDataOptionsFederationEntityID", "syntax" => "It must be an URL",'validation'=> 'is_string'),
-                "fdSAMLFederationOptionalAttributes" => array("remotesso" =>  "samlSPMetaDataOptionsFederationOptionalAttributes", "syntax" => "It must be an boolean",'validation'=> 'is_string'),
-                "fdSAMLFederationMandatoryAttributes" => array("remotesso" =>  "samlSPMetaDataOptionsFederationRequiredAttributes", "syntax" => "It must be an boolean",'validation'=> 'is_string'),
-                        
+                "fdSAMLIDPInitiated"    => array(
+                        "remotesso" =>  "samlSPMetaDataOptionsEnableIDPInitiatedURL"
+                        ),
+                "fdSAMLSignSLO"         => array(
+                        "remotesso" =>  "samlSPMetaDataOptionsSignSLOMessage"
+                        ),
+                "fdSAMLSignSSO"         => array(
+                        "remotesso" =>  "samlSPMetaDataOptionsSignSSOMessage"
+                        ),
+                "fdSAMLSignatureMethod" => array(
+                        "remotesso" =>  "samlSPMetaDataOptionsSignatureMethod"
+                        ),
+                "fdSAMLFederationEntityID" => array(
+                        "remotesso" =>  "samlSPMetaDataOptionsFederationEntityID",
+                        "syntax" => "It must be an URL",
+                        'validation'=> 'is_string'
+                        ),
+                "fdSAMLFederationOptionalAttributes" => array(
+                        "remotesso" =>  "samlSPMetaDataOptionsFederationOptionalAttributes",
+                        "syntax" => "It must be an boolean",
+                        'validation'=> 'is_string',
+                        'label'=> 'Optionnal Attribtutes'),
+                "fdSAMLFederationMandatoryAttributes" => array(
+                        "remotesso" =>  "samlSPMetaDataOptionsFederationRequiredAttributes", 
+                        "syntax" => "It must be an boolean",
+                        'validation'=> 'is_string',
+                        'label'=> 'Mandatory Attribtutes'
+                        ),
         ),
 
     );
 
 
-
+    /*
+     this function merge FD Mapping of SSO values and Remote SSO ( LLNG) */
     public function getOptionsMapping($protocol){
         $this->updateMappingFD($this->mappingLLNG);
         return($this->mappingFD[$protocol]);
