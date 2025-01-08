@@ -141,6 +141,42 @@ attributetype ( 1.3.6.1.4.1.38414.142.5.18 NAME 'fdAccessApplicationConfKey'
         SYNTAX 1.3.6.1.4.1.1466.115.121.1.26
         SINGLE-VALUE )
 
+
+attributetype ( 1.3.6.1.4.1.38414.142.5.19 NAME 'fdAccessApplicationOIDCAttributes'
+        DESC 'FusionDirectory - OIDC Access Attributes'
+        EQUALITY caseIgnoreIA5Match
+        SUBSTR caseIgnoreSubstringsMatch
+        SYNTAX 1.3.6.1.4.1.1466.115.121.1.26
+        )
+
+attributetype ( 1.3.6.1.4.1.38414.142.5.20 NAME 'fdAccessApplicationSAMLAttributes'
+        DESC 'FusionDirectory - SAML Access Attributes'
+        EQUALITY caseIgnoreIA5Match
+        SUBSTR caseIgnoreSubstringsMatch
+        SYNTAX 1.3.6.1.4.1.1466.115.121.1.26
+        )
+
+attributetype ( 1.3.6.1.4.1.38414.142.5.21 NAME 'fdAccessApplicationCASAttributes'
+        DESC 'FusionDirectory - CAS Access Attributes'
+        EQUALITY caseIgnoreIA5Match
+        SUBSTR caseIgnoreSubstringsMatch
+        SYNTAX 1.3.6.1.4.1.1466.115.121.1.26
+        )
+
+attributetype ( 1.3.6.1.4.1.38414.142.5.22 NAME 'fdAccessEntityType'
+        DESC 'FusionDirectory - Access Entity Type'
+        EQUALITY caseIgnoreIA5Match
+        SUBSTR caseIgnoreSubstringsMatch
+        SYNTAX 1.3.6.1.4.1.1466.115.121.1.26
+        )
+
+attributetype ( 1.3.6.1.4.1.38414.142.5.23 NAME 'fdAccessEntityAuthority'
+        DESC 'FusionDirectory - Access Entity Authority'
+        EQUALITY caseIgnoreIA5Match
+        SUBSTR caseIgnoreSubstringsMatch
+        SYNTAX 1.3.6.1.4.1.1466.115.121.1.26
+        )
+
 # Object Class
 objectclass (1.3.6.1.4.1.38414.142.6.1 NAME 'fdAccessAttributes'
         DESC 'FusionDirectory - AccessAttributes Values'
@@ -158,8 +194,8 @@ objectclass (1.3.6.1.4.1.38414.142.4.1 NAME 'fdAccessService'
 objectclass (1.3.6.1.4.1.38414.142.4.2 NAME 'fdAccessApplication'
         SUP top AUXILIARY
         DESC 'FusionDirectory - Access Application Config'
-        MUST (fdAccessApplicationAuthType $ fdAccessEntityType)
-        MAY (fdAccessApplicationConfKey $ fdAccessApplicationAttributes $ fdAccessApplicationOIDCClientSecret $ fdAccessApplicationOIDCClientID $ fdAccessApplicationSettings $ fdAccessApplicationAuthServerDn $ fdAccessApplicationMacros $ fdAccessApplicationSAMLMetadataFile $ fdAccessApplicationScopeRules $ fdAccessApplicationService $ fdAccessEntityAuthority $ o $ mail))
+        MUST (fdAccessApplicationAuthType )
+        MAY (fdAccessApplicationConfKey $ fdAccessEntityType $ fdAccessApplicationCASAttributes $ fdAccessApplicationSAMLAttributes $ fdAccessApplicationOIDCAttributes $ fdAccessApplicationAttributes $ fdAccessApplicationOIDCClientSecret $ fdAccessApplicationOIDCClientID $ fdAccessApplicationSettings $ fdAccessApplicationAuthServerDn $ fdAccessApplicationMacros $ fdAccessApplicationSAMLMetadataFile $ fdAccessApplicationScopeRules $ fdAccessApplicationService $ fdAccessEntityAuthority $ o $ mail))
 
 objectclass (1.3.6.1.4.1.38414.142.4.3 NAME 'fdAccessFederation'
         DESC 'FusionDirectory - Federation Declaration'

@@ -72,7 +72,7 @@ class accessMethodLemonLDAPNG {
     
     }
 
-
+    # Check if applications exist
     function checkApplication($type,$appConfKey){
 
         $getfct="get".ucfirst(strtolower($type))."AppByConfKey";
@@ -87,12 +87,136 @@ class accessMethodLemonLDAPNG {
     
     }
 
+    # Get Row information from Remote SSO systeme
     function getApplication($type,$appConfKey){
 
         $getfct="get".ucfirst(strtolower($type))."AppByConfKey";
         $handle=new accessRemoteLemonLDAPNG($this->serviceConfig);
         $res=$handle->$getfct($appConfKey);
         return($res);
+    }
+
+    function cleanRemoteConfig($remote){
+        $config=$remote['data'];
+        // clean phase of remote options config
+        $duplicate_data=['redirectUris','clientId'];
+        foreach ($duplicate_data as $attr){
+            unset($config['options'][$attr]);
+        }
+        // clean empty value in each sections
+        // maybe use array_walk_recursive ?
+        foreach ($config as $k => $v){
+            if (empty($v)){
+                unset($config[$k]);
+            }else{
+                foreach ($config[$k] as $subk => $subv){
+                    if (empty($subv)){
+                        unset($config[$k][$subk]);
+                    }
+                }
+            }
+        }
+        return($config);
+    }
+
+    # Transform remote LL::NG response to Pivot Format
+    function configRemoteToPivot($remote){
+
+        $config=$this->cleanRemoteConfig($remote);
+        var_dump($config);
+        var_dump("Version RemoteToPivot");
+        // check Type of authentification
+        // I'm a OIDC config
+        $remotePivot=array();
+        // Method sections
+        if(isset($config['clientId'])){
+            $remotePivot['OIDC']['clientId']=$config['clientId'];
+            $remotePivot['OIDC']['clientSecret']=$config['options']['clientSecret'];
+            $remotePivot['OIDC']['service']=$config['redirectUris'];
+            if (isset($config['extraClaims'])){
+                foreach ($config['extraClaims'] as $k => $v){
+                    $extraClaims_array[$k]=explode(" ",$v);
+                }
+            }
+        }
+        // Macros sections
+        $remotePivot['macros']=$config['macros'];
+        // Appname sections
+        $remotePivot['appname']=$config['confKey'];
+        // Description sections
+        $remotePivot['description']=$config['options']['comment'];
+        // Attributs section
+        foreach ($config['exportedVars'] as $k => $v){ 
+            $remotePivot['attributes'][$k]=array("friendlyName"=> $v);
+            // OIDC add info is attribute is in a dedicated OIDC scope
+            if ( isset($extraClaims_array)){
+                foreach ($extraClaims_array as $sk => $sv){
+                    if (in_array($k,$sv)){
+                        $remotePivot['attributes'][$k]['scope']=$sk;
+                    }
+                }
+                
+            }
+            // complete with local defintion of attribute
+
+            // PERTINENT ?????
+            global $config;
+            $ldap = $config->get_ldap_link();
+            $ldap->cd("dc=demo,dc=fusion");
+            $ldap->search('(&(objectClass=fdAccessAttributes)(cn='.$k.'))', ['fdAccessAttributeOID','fdAccessAttributeAlias']);
+            //var_dump($ldap->fetch());
+            while( $attr_data = $ldap->fetch()) {
+                if( empty($remotePivot['attributes'][$k]['friendlyName'])){
+                    $remotePivot['attributes'][$k]['friendlyName']=$attr_data['fdAccessAttributeAlias'][0];
+                }
+                if( empty($remotePivot['attributes'][$k]['name'])){
+                    $remotePivot['attributes'][$k]['name']=$attr_data['fdAccessAttributeOID'][0];
+                }                
+        /*
+              $application['attributes'][$attr_data['cn'][0]]=array(
+                "friendlyName" => $attr_data['fdAccessAttributeAlias'][0],
+                "mandatory" => $attribute_mandatory,
+                "scope" => $attribute_scope,
+                "format" => $attribute_samlformat,
+                "name" => $attr_data['fdAccessAttributeOID'][0]
+            );        
+            */
+            }
+        }
+        return($remotePivot);
+        
+ /*
+        'appname' => string 'other-conf-key' (length=14)
+        'description' => string 'applicaion fde test qzdfjazmldfhamzldhfmlahdfmlQDHFLQBDfmlbdqf  / Modified by fd-admin on 04 / 01 / 25 08:35' (length=108)
+        'OIDC' => 
+          array (size=3)
+            'clientId' => string 'clientID654-new-again' (length=21)
+            'clientSecret' => string 'secretbiengarder-new-again' (length=26)
+            'service' => 
+              array (size=3)
+                0 => string 'http://test.oidc' (length=16)
+                1 => string 'http://test2.oidc' (length=17)
+                2 => string 'http://test3.oidc' (length=17)
+        'attributes' => 
+          array (size=2)
+            'cn' => 
+              array (size=5)
+                'friendlyName' => string 'commonName' (length=10)
+                'mandatory' => string 'FALSE' (length=5)
+                'scope' => string '' (length=0)
+                'format' => string '' (length=0)
+                'name' => string '5.5.5.5.5.5.5.' (length=14)
+            'mail' => 
+              array (size=5)
+                'friendlyName' => string 'email' (length=5)
+                'mandatory' => string 'FALSE' (length=5)
+                'scope' => string 'scopemail' (length=9)
+                'format' => string '' (length=0)
+                'name' => string '6.6.6666' (length=8)
+        'macros' => 
+          array (size=1)
+            0 => string 'macro1;macro1()' (length=15)
+*/
     
     }
 
