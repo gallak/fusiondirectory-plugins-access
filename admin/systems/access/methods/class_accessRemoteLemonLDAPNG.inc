@@ -16,6 +16,8 @@ class accessRemoteLemonLDAPNG extends accessRemoteCommon {
       - range : values autorized or present un list
       for LL:NG :     #https://gitlab.ow2.org/lemonldap-ng/lemonldap-ng/-/blob/v2.0/lemonldap-ng-manager/lib/Lemonldap/NG/Manager/Build/Attributes.pm
     */
+    // FIXME move to class_accessMethodLemonLDAPNG.inc
+    /*
     private $mappingLLNG =array(
         "COMMON" => array(),
         "CAS" => array(
@@ -31,35 +33,40 @@ class accessRemoteLemonLDAPNG extends accessRemoteCommon {
                 "fdCASRule"             => array(
                         "remotesso" =>  "casAppMetaDataOptionsRule"
                         ),
-/*                "fdCASURLService"       => array(
-                        "remotesso" =>  "casAppMetaDataOptionsService"
-                        ),*/
                 "fdCASUserAttribute"    => array(
                         "remotesso" =>  "casAppMetaDataOptionsUserAttribute"
                         ),
                 ),
         "OIDC" => array(
-/*                "fdOIDCClientID"        => array(
-                        "remotesso" =>  "oidcRPMetaDataOptionsClientID",
-                        "syntax" => "It must an string see : https://lemonldap-ng.org"
-                        ),
-                "fdOIDCClientSecret"    => array(
-                        "remotesso" =>  "oidcRPMetaDataOptionsClientSecret"
-                        ),*/
                 "fdOIDCLogoutType"      => array(
-                        "remotesso" =>  "oidcRPMetaDataOptionsLogoutType"
+                        "remotesso" =>  "oidcRPMetaDataOptionsLogoutType",
+                        "label"         => "Type of logout",
+                        "validation" => "is_string"
                         ),
-/*                "fdOIDCRedirectURIs"    => array(
-                        "remotesso" =>  "oidcRPMetaDataOptionsRedirectUris"
-                        ),*/
                 "fdOIDCAuthLevel"        => array(
                         "remotesso"=>  "oidcRPMetaDataOptionsAuthnLevel",
                         "syntax" => "It must an integer corresponding to auth Level see : https://lemonldap-ng.org",
-                        "range" => array("-3","5")
+                        "range" => array("-3","5"),
+                        "validation" => "is_select",          
+                        "label" => "Authentification level"
                         ),
                 "fdOIDCServiceEncAlgo"  => array(
                         "remotesso" =>  "oidcServiceEncAlgorithmEnc", 
-                        "range"      => array("A256CBC-HS512","A256GCM","A192CBC-HS384","A192GCM","A128CBC-HS256","A128GCM") 
+                        "range"      => array("A256CBC-HS512","A256GCM","A192CBC-HS384","A192GCM","A128CBC-HS256","A128GCM"),
+                        "validation" => "is_select",                        
+                        "label"         => "Encryption algorithm"
+                        ),
+                "fdOIDCServiceAccessTokenEncAlgo"  => array(
+                        "remotesso" =>  "accessTokenEncContentEncAlg", 
+                        "range"      => array("A256CBC-HS512","A256GCM","A192CBC-HS384","A192GCM","A128CBC-HS256","A128GCM"),
+                        "validation" => "is_select",
+                        "label" => "Token Encryption algorithm"
+                        ),
+                        
+                "fdOIDCServiceIcon"  => array(
+                        "remotesso" =>  "icon",
+                        "validation" => "is_string",
+                        "label" => "Path of icon of service"
                         ),
                 ),
         "SAML" => array(
@@ -93,15 +100,17 @@ class accessRemoteLemonLDAPNG extends accessRemoteCommon {
                         ),
         ),
 
-    );
+    ); */
 
 
     /*
      this function merge FD Mapping of SSO values and Remote SSO ( LLNG) */
+     // FIXME move to class_accessMethodLemonLDAPNG.inc
+     /*
     public function getOptionsMapping($protocol){
         $this->updateMappingFD($this->mappingLLNG);
         return($this->mappingFD[$protocol]);
-    }
+    }*/
 
 
     public function __construct($cnx) {

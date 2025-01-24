@@ -19,10 +19,106 @@ class accessMethodLemonLDAPNG {
         "SAML" => "samlSPMetaData"
     );
 
+    /* local mapping 
+      - remotesso : name of LL::NG variable
+      - validation : rule for validate entered data
+      - label : text shown in drop list
+      - range : values autorized or present un list
+      for LL:NG :     #https://gitlab.ow2.org/lemonldap-ng/lemonldap-ng/-/blob/v2.0/lemonldap-ng-manager/lib/Lemonldap/NG/Manager/Build/Attributes.pm
+    */
+
+    private $mappingLLNG =array(
+        "COMMON" => array(),
+        "CAS" => array(
+                "fdCASAuthLevel"        => array(
+                        "remotesso" =>  "casAppMetaDataOptionsAuthnLevel",
+                        "syntax" => "It must an integer corresponding to auth Level see : https://lemonldap-ng.org",
+                        "range" => array("-4","5")
+                        ),
+                "fdCASLogoutURL"        => array(
+                        "remotesso" =>  "casAppMetaDataOptionsLogout",
+                        "syntax" => "It must an URI"
+                        ),
+                "fdCASRule"             => array(
+                        "remotesso" =>  "casAppMetaDataOptionsRule"
+                        ),
+                "fdCASUserAttribute"    => array(
+                        "remotesso" =>  "casAppMetaDataOptionsUserAttribute"
+                        ),
+                ),
+        "OIDC" => array(
+                "fdOIDCLogoutType"      => array(
+                        "remotesso" =>  "oidcRPMetaDataOptionsLogoutType",
+                        "label"         => "Type of logout",
+                        "validation" => "is_string"
+                        ),
+                "fdOIDCAuthLevel"        => array(
+                        "remotesso"=>  "oidcRPMetaDataOptionsAuthnLevel",
+                        "syntax" => "It must an integer corresponding to auth Level see : https://lemonldap-ng.org",
+                        "range" => array("-3","5"),
+                        "validation" => "is_select",          
+                        "label" => "Authentification level"
+                        ),
+                "fdOIDCServiceEncAlgo"  => array(
+                        "remotesso" =>  "oidcServiceEncAlgorithmEnc", 
+                        "range"      => array("A256CBC-HS512","A256GCM","A192CBC-HS384","A192GCM","A128CBC-HS256","A128GCM"),
+                        "validation" => "is_select",                        
+                        "label"         => "Encryption algorithm"
+                        ),
+                "fdOIDCServiceAccessTokenEncAlgo"  => array(
+                        "remotesso" =>  "accessTokenEncContentEncAlg", 
+                        "range"      => array("A256CBC-HS512","A256GCM","A192CBC-HS384","A192GCM","A128CBC-HS256","A128GCM"),
+                        "validation" => "is_select",
+                        "label" => "Token Encryption algorithm"
+                        ),
+                        
+                "fdOIDCServiceIcon"  => array(
+                        "remotesso" =>  "icon",
+                        "validation" => "is_string",
+                        "label" => "Path of icon of service"
+                        ),
+                ),
+        "SAML" => array(
+                "fdSAMLIDPInitiated"    => array(
+                        "remotesso" =>  "samlSPMetaDataOptionsEnableIDPInitiatedURL"
+                        ),
+                "fdSAMLSignSLO"         => array(
+                        "remotesso" =>  "samlSPMetaDataOptionsSignSLOMessage"
+                        ),
+                "fdSAMLSignSSO"         => array(
+                        "remotesso" =>  "samlSPMetaDataOptionsSignSSOMessage"
+                        ),
+                "fdSAMLSignatureMethod" => array(
+                        "remotesso" =>  "samlSPMetaDataOptionsSignatureMethod"
+                        ),
+                "fdSAMLFederationEntityID" => array(
+                        "remotesso" =>  "samlSPMetaDataOptionsFederationEntityID",
+                        "syntax" => "It must be an URL",
+                        'validation'=> 'is_string'
+                        ),
+                "fdSAMLFederationOptionalAttributes" => array(
+                        "remotesso" =>  "samlSPMetaDataOptionsFederationOptionalAttributes",
+                        "syntax" => "It must be an boolean",
+                        'validation'=> 'is_string',
+                        'label'=> 'Optionnal Attribtutes'),
+                "fdSAMLFederationMandatoryAttributes" => array(
+                        "remotesso" =>  "samlSPMetaDataOptionsFederationRequiredAttributes", 
+                        "syntax" => "It must be an boolean",
+                        'validation'=> 'is_string',
+                        'label'=> 'Mandatory Attribtutes'
+                        ),
+        ),
+
+    );
+
+
+
+
     // retrun all option per protocol
     public function getRemoteAccessServerMapping($protocol){
-        $handle= new accessRemoteLemonLDAPNG($conf);
-        return($handle->getOptionsMapping($protocol));
+        //$handle= new accessRemoteLemonLDAPNG($this->serviceConfig);
+        //return($handle->getOptionsMapping($protocol));
+        return($this->mappingLLNG[$protocol]);
     }
 
     public function getMethodCode(): string{
@@ -96,8 +192,10 @@ class accessMethodLemonLDAPNG {
         return($res);
     }
 
+    /* remove empty value from remote config */
     function cleanRemoteConfig($remote){
         $config=$remote['data'];
+        //var_dump($config);
         // clean phase of remote options config
         $duplicate_data=['redirectUris','clientId'];
         foreach ($duplicate_data as $attr){
@@ -119,106 +217,94 @@ class accessMethodLemonLDAPNG {
         return($config);
     }
 
-    # Transform remote LL::NG response to Pivot Format
-    function configRemoteToPivot($remote){
+    // Transform remote LL::NG response to Pivot Format
+    function configRemoteToPivot($type,$remoteConfig,$availableAttributes){
 
-        $config=$this->cleanRemoteConfig($remote);
-        var_dump($config);
-        var_dump("Version RemoteToPivot");
-        // check Type of authentification
-        // I'm a OIDC config
+        $cleanConfig=$this->cleanRemoteConfig($remoteConfig);
+        //var_dump("Version Clean Config");
+        //var_dump($cleanConfig);
         $remotePivot=array();
-        // Method sections
-        if(isset($config['clientId'])){
-            $remotePivot['OIDC']['clientId']=$config['clientId'];
-            $remotePivot['OIDC']['clientSecret']=$config['options']['clientSecret'];
-            $remotePivot['OIDC']['service']=$config['redirectUris'];
-            if (isset($config['extraClaims'])){
-                foreach ($config['extraClaims'] as $k => $v){
-                    $extraClaims_array[$k]=explode(" ",$v);
-                }
-            }
-        }
-        // Macros sections
-        $remotePivot['macros']=$config['macros'];
-        // Appname sections
-        $remotePivot['appname']=$config['confKey'];
-        // Description sections
-        $remotePivot['description']=$config['options']['comment'];
-        // Attributs section
-        foreach ($config['exportedVars'] as $k => $v){ 
-            $remotePivot['attributes'][$k]=array("friendlyName"=> $v);
-            // OIDC add info is attribute is in a dedicated OIDC scope
-            if ( isset($extraClaims_array)){
-                foreach ($extraClaims_array as $sk => $sv){
-                    if (in_array($k,$sv)){
-                        $remotePivot['attributes'][$k]['scope']=$sk;
-                    }
-                }
-                
-            }
-            // complete with local defintion of attribute
+        // check Type of authentification
+        // manage attributes
 
-            // PERTINENT ?????
-            global $config;
-            $ldap = $config->get_ldap_link();
-            $ldap->cd("dc=demo,dc=fusion");
-            $ldap->search('(&(objectClass=fdAccessAttributes)(cn='.$k.'))', ['fdAccessAttributeOID','fdAccessAttributeAlias']);
-            //var_dump($ldap->fetch());
+
+        foreach ($cleanConfig['exportedVars'] as $k => $v){
+            $remotePivot['attributes'][$k]['dn']=$availableAttributes[$k]['dn'];
+            if( empty($remotePivot['attributes'][$k]['friendlyName'])){
+                $remotePivot['attributes'][$k]['friendlyName']=$availableAttributes[$k]['fdAccessAttributeAlias'];
+            }
+            if( empty($remotePivot['attributes'][$k]['name'])){
+                $remotePivot['attributes'][$k]['name']=$availableAttributes[$k]['fdAccessAttributeOID'];
+            }  
+        }
+
+/*
+        global $config;
+        $ldap = $config->get_ldap_link();
+        // FIXME should be more optmized
+        $ldap->cd("dc=demo,dc=fusion");
+        foreach ($cleanConfig['exportedVars'] as $k => $v){
+            $ldap->search('(&(objectClass=fdAccessAttributes)(cn='.$k.'))', ['dn','fdAccessAttributeOID','fdAccessAttributeAlias']);
             while( $attr_data = $ldap->fetch()) {
+                $remotePivot['attributes'][$k]['dn']=$attr_data['dn'];
                 if( empty($remotePivot['attributes'][$k]['friendlyName'])){
                     $remotePivot['attributes'][$k]['friendlyName']=$attr_data['fdAccessAttributeAlias'][0];
                 }
                 if( empty($remotePivot['attributes'][$k]['name'])){
                     $remotePivot['attributes'][$k]['name']=$attr_data['fdAccessAttributeOID'][0];
-                }                
-        /*
-              $application['attributes'][$attr_data['cn'][0]]=array(
-                "friendlyName" => $attr_data['fdAccessAttributeAlias'][0],
-                "mandatory" => $attribute_mandatory,
-                "scope" => $attribute_scope,
-                "format" => $attribute_samlformat,
-                "name" => $attr_data['fdAccessAttributeOID'][0]
-            );        
-            */
+                }        
             }
         }
-        return($remotePivot);
-        
- /*
-        'appname' => string 'other-conf-key' (length=14)
-        'description' => string 'applicaion fde test qzdfjazmldfhamzldhfmlahdfmlQDHFLQBDfmlbdqf  / Modified by fd-admin on 04 / 01 / 25 08:35' (length=108)
-        'OIDC' => 
-          array (size=3)
-            'clientId' => string 'clientID654-new-again' (length=21)
-            'clientSecret' => string 'secretbiengarder-new-again' (length=26)
-            'service' => 
-              array (size=3)
-                0 => string 'http://test.oidc' (length=16)
-                1 => string 'http://test2.oidc' (length=17)
-                2 => string 'http://test3.oidc' (length=17)
-        'attributes' => 
-          array (size=2)
-            'cn' => 
-              array (size=5)
-                'friendlyName' => string 'commonName' (length=10)
-                'mandatory' => string 'FALSE' (length=5)
-                'scope' => string '' (length=0)
-                'format' => string '' (length=0)
-                'name' => string '5.5.5.5.5.5.5.' (length=14)
-            'mail' => 
-              array (size=5)
-                'friendlyName' => string 'email' (length=5)
-                'mandatory' => string 'FALSE' (length=5)
-                'scope' => string 'scopemail' (length=9)
-                'format' => string '' (length=0)
-                'name' => string '6.6.6666' (length=8)
-        'macros' => 
-          array (size=1)
-            0 => string 'macro1;macro1()' (length=15)
 */
+
+
+
+
+
+
+        $remotePivot['appname']=$cleanConfig['confKey'];
+        $remotePivot['description']=$cleanConfig['options']['comment'];
+        $remotePivot['macros']=$cleanConfig['macros'];
+        $remotePivot['protocol']=$type;
+
+
+        // I'm a OIDC config
+        
+        if ($type == "OIDC"){
+            // main setttings
+            $remotePivot['settings']['service']=$cleanConfig['redirectUris'];
+            $remotePivot['settings']['clientId']=$cleanConfig['clientId'];
+            $remotePivot['settings']['clientSecret']=$cleanConfig['options']['clientSecret'];
+            // format and table of OIDC attribute
+            foreach ($cleanConfig['exportedVars'] as $k => $v){
+                $attributes_array=explode(";",$v);
+                $remotePivot['attributes'][$k]['format']=$attributes_array[1];
+                $remotePivot['attributes'][$k]['table']=$attributes_array[2];
+            }
+            foreach ($cleanConfig['extraClaims'] as $k => $v){
+                $claims=explode(" ",$v);
+                foreach ($claims as $claim){
+                    $remotePivot['attributes'][$claim]['scope']=$k;
+                }
+            }
+        }
+
+
+        foreach ($this->getRemoteAccessServerMapping($type) as $fdAttr => $fdValue){
+            foreach ($cleanConfig['options'] as $remoteAttr => $remoteValue){
+                if ($fdValue['remotesso'] == $remoteAttr ){
+                    $remotePivot['additionnalSettings'][$fdAttr] =$remoteValue;
+                }
+            }
+
+        }
+
+
+        return($remotePivot);
     
     }
+
+
 
 
     function importApplication($type,$appConfKey){
@@ -249,11 +335,14 @@ class accessMethodLemonLDAPNG {
 
     function updateApplication($type,$content){
         $res=array();
-        if ($this->ifExistApplication($type,json_decode($content)->confKey)){
-            $res=$this->replaceApplication($type,$content);
+        //if ($this->ifExistApplication($type,json_decode($content)->confKey)){
+        if ($this->ifExistApplication($type,$content['confKey'])){
+            var_dump($content);
+            var_dump(json_encode($content));
+            $res=$this->replaceApplication($type,json_encode($content));
         }else{
             var_dump($content);
-            $res=$this->addApplication($type,$content);
+            $res=$this->addApplication($type,json_encode($content));
         }
         if ( preg_match("/^4..$/",$res['code'])){
             msg_dialog::display(_($type." application error"), sprintf(_("An error occurs during updating application. <br> %s <br> Detailed error : <br> %s"),$res['msg'],$res['data']['error']),ERROR_DIALOG);
@@ -275,6 +364,62 @@ class accessMethodLemonLDAPNG {
             msg_dialog::display(_($type." application information"), sprintf(_("Application has been successfully deleted<br>Message : %s"),$res['msg']),INFO_DIALOG);
         }
     }
+
+
+
+    // Transforme Pivot Format to remote LL:NG
+
+    function configPivotToRemote($pivotConfig)
+    {
+        // get MApping for current Access Server
+        $mappingConfig=$this->getRemoteAccessServerMapping($pivotConfig['protocol']);
+        //var_dump($mappingConfig);
+        $extraClaims=array();
+        
+        // common
+        $remoteConfig=array(
+            'confKey'=> $pivotConfig['appname'],
+            'macros' => $pivotConfig['macro'],
+            'options' => array('comment' => $pivotConfig['description'])
+        );
+        
+        $remoteConfig['redirectUris']=$pivotConfig['settings']['service'];
+        $remoteConfig['options']['redirectUris']=$pivotConfig['settings']['service'];
+
+        if ($pivotConfig['protocol'] == "OIDC"){
+            $remoteConfig['clientId']=$pivotConfig['settings']['clientId'];
+            $remoteConfig['options']['clientId']=$pivotConfig['settings']['clientId'];
+            $remoteConfig['options']['clientSecret']=$pivotConfig['settings']['clientSecret'];
+        }
+
+        // attributes
+
+        foreach($pivotConfig['attributes'] as $k => $v){
+            $exportedVars=$pivotConfig['attributes'][$k]['friendlyName'];
+            if ( $pivotConfig['attributes'][$k]['format']){
+                $exportedVars=$exportedVars.";".$pivotConfig['attributes'][$k]['format'];
+            }
+
+            
+            if ( $pivotConfig['attributes'][$k]['table']){
+                $exportedVars=$exportedVars.";".$pivotConfig['attributes'][$k]['table'];   
+            }
+            // create 
+            $remoteConfig['exportedVars'][$k]=$exportedVars;
+            if ( $pivotConfig['attributes'][$k]['scope']){
+                   $extraClaims[$pivotConfig['attributes'][$k]['scope']][]=$k;
+            } 
+        }
+        foreach( $extraClaims as $scope => $claims){
+            $remoteConfig['extraClaims'][$scope]=implode(" ",$claims);
+        }
+        // options
+        return($remoteConfig);
+    }
+
+
+//on s'insipre d'en dessous
+
 
     function generateConfig(array $appConfig) {
         
