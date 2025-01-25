@@ -40,7 +40,8 @@
            'fdAccessApplicationSettings_value', TRUE
          )
        ],
-       '/^([^;]+);(.*)$/',
+//       '/^([^;]+);(.*)$/',
+       '/^(.*);(.*)$/',       
        '%s;%s',
        $acl, $label
      );
@@ -91,7 +92,7 @@
   
       new SelectAttribute(
         _('Value type'), _('type of value'),
-        'fdAccessApplicationAttributes_type', FALSE, ['bool','integer','string'],'',['boolean','integer','string']
+        'fdAccessApplicationAttributes_type', FALSE, ['bool','int','string'],'',['boolean','integer','string']
         ),
       new SelectAttribute(
         _('Table Distribution'), _('Distribute as table'),
@@ -314,12 +315,18 @@ class accessWebApplication extends simplePlugin
             $lattributs=$attr_data['dn'].";".$remotePivot["attributes"][$attrs]['friendlyName'];
             if( isset($remotePivot["attributes"][$attrs]['scope'])){
               $lattributs=$lattributs.";".$remotePivot["attributes"][$attrs]['scope'];
+            }else{
+              $lattributs=$lattributs.";;";
             }
             if( isset($remotePivot["attributes"][$attrs]['format'])){
               $lattributs=$lattributs.";".$remotePivot["attributes"][$attrs]['format'];
+            }else{
+              $lattributs=$lattributs.";;";
             }
             if( isset($remotePivot["attributes"][$attrs]['table'])){
-              $lattributs=$lattributs.";".$remotePivot["attributes"][$attrs]['scope'];
+              $lattributs=$lattributs.";".$remotePivot["attributes"][$attrs]['table'];
+            }else{
+              $lattributs=$lattributs.";;";
             }
           }
         $lattributsArray[]=$lattributs;

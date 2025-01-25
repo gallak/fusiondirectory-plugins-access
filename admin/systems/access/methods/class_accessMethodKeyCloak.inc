@@ -15,14 +15,7 @@ class accessMethodKeyCloak {
         return($this->name);
     }
 
-    
 
-
-    // retrun array for filling select attribute
-    public function getRemoteAccessServerMapping($protocol){
-        $handle= new accessRemoteKeyCloak($conf);
-        return($handle->getOptionsMapping($protocol));
-    }
 
 
     function setConfig($conf) {

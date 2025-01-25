@@ -28,12 +28,6 @@ class accessRemoteKeyCloak extends accessRemoteCommon {
 
     );
 
-
-    public function getOptionsMapping($protocol){
-        $this->updateMappingFD($this->mappingKC);
-        return($this->mappingFD[$protocol]);
-    }
-
     public function __construct($cnx) {
         $this->cnx = $cnx;
     }

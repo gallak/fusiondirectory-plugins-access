@@ -77,6 +77,11 @@ class accessMethodLemonLDAPNG {
                         "validation" => "is_string",
                         "label" => "Path of icon of service"
                         ),
+                "fdOIDCPublicClient"  => array(
+                        "remotesso" =>  "public",
+                        "validation" => "is_bool",
+                        "label" => "OIDC Public Client"
+                        ),
                 ),
         "SAML" => array(
                 "fdSAMLIDPInitiated"    => array(
@@ -257,11 +262,16 @@ class accessMethodLemonLDAPNG {
             // format and table of OIDC attribute
             foreach ($cleanConfig['exportedVars'] as $k => $v){
                 $attributes_array=explode(";",$v);
+
                 if (isset($attributes_array[1])){
                     $remotePivot['attributes'][$k]['format']=$attributes_array[1];
+                }else{
+                    $remotePivot['attributes'][$k]['format']="";
                 }
                 if (isset($attributes_array[2])){
                     $remotePivot['attributes'][$k]['table']=$attributes_array[2];
+                }else{
+                    $remotePivot['attributes'][$k]['table']="";
                 }
             }
             foreach ($cleanConfig['extraClaims'] as $k => $v){
@@ -318,7 +328,6 @@ class accessMethodLemonLDAPNG {
 
     function updateApplication($type,$content){
         $res=array();
-        //if ($this->ifExistApplication($type,json_decode($content)->confKey)){
         if ($this->ifExistApplication($type,$content['confKey'])){
             var_dump($content);
             var_dump(json_encode($content));
