@@ -72,11 +72,14 @@
    
  }
  
- class ssoAttributesCompositeAttributes extends CharSeparatedCompositeAttribute
- {
-  function __construct ($protocol, $label, $description, $ldapName, $acl = ""){
+ 
+ 
 
-    $oidc_attributes=array(
+ class oidcCompositeAttributes extends CharSeparatedCompositeAttribute
+ {
+  function __construct ( $label, $description, $ldapName, $acl = ""){
+
+    $attributes=array(
       new ObjectSelectAttribute(
         _('Attribut'), _('Attribut'),
         'fdAccessApplicationAttributes_dn', FALSE,['attributes']
@@ -99,8 +102,15 @@
         'fdAccessApplicationAttributes_table', FALSE, ['automatic','always','never'],'',['automatic','always','never']
         )
     );
-  
-    $saml_attributes=array(
+    parent::__construct($description, $ldapName, $attributes,';','','');  
+
+  }
+}
+
+class samlCompositeAttributes extends CharSeparatedCompositeAttribute
+{
+  function __construct ( $label, $description, $ldapName, $acl = ""){
+    $attributes=array(
       new ObjectSelectAttribute(
         _('Attribut'), _('Attribut'),
         'fdAccessApplicationAttributes_dn', FALSE,['attributes']
@@ -114,8 +124,14 @@
         'fdAccessApplicationAttributes_samlFormat', FALSE, ['URI','Basic','unspecified'],'',['URI','Basic','unspecified']
         )
       );
-  
-    $cas_attributes=array(
+      parent::__construct($description, $ldapName, $attributes,';','',''); 
+    }
+}
+
+class casCompositeAttributes extends CharSeparatedCompositeAttribute
+{
+  function __construct ( $label, $description, $ldapName, $acl = ""){
+    $attributes=array(
       new ObjectSelectAttribute(
         _('Attribut'), _('Attribut'),
         'fdAccessApplicationAttributes_dn', FALSE,['attributes']
@@ -125,21 +141,10 @@
         'fdAccessApplicationAttributes_name', FALSE, ""
         )
     );
-
-  if ( $protocol == "oidc" ){
-    parent::__construct($description, $ldapName, $oidc_attributes,';','','');  
-  }
-  if ( $protocol == "saml" ){
-    parent::__construct($description, $ldapName, $saml_attributes,';','','');
-  }
-  if ( $protocol == "cas" ){
-    parent::__construct($description, $ldapName, $cas_attributes,';','','');
-  }
-  }
- }
- 
-
-
+      parent::__construct($description, $ldapName, $attributes,';','',''); 
+    }
+}  
+  
 
 class accessWebApplication extends simplePlugin
 {
@@ -523,24 +528,21 @@ class accessWebApplication extends simplePlugin
         'name'  => _('Attributes / Scope Rules definitions'),
         'attrs' => [
           new OrderedArrayAttribute(
-            new ssoAttributesCompositeAttributes(
-              "oidc",
+            new oidcCompositeAttributes(
               _("Attributes"),
               _("une description quelconque"),
               'fdAccessApplicationOIDCAttributes'
             ),FALSE,[],TRUE),
         
           new OrderedArrayAttribute(
-            new ssoAttributesCompositeAttributes(
-              "saml",
+            new samlCompositeAttributes(
               _("Attributes"),
               _("une description quelconque"),
               'fdAccessApplicationSAMLAttributes'
             ),FALSE,[],TRUE),
 
           new OrderedArrayAttribute(
-            new ssoAttributesCompositeAttributes(
-              "cas",
+            new casCompositeAttributes(
               _("Attributes"),
               _("une description quelconque"),
               'fdAccessApplicationCASAttributes'
