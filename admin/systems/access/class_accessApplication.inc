@@ -107,6 +107,34 @@
   }
 }
 
+class oidcScopeCompositeAttributes extends CharSeparatedCompositeAttribute
+{
+ function __construct ( $label, $description, $ldapName, $acl = ""){
+
+   $attributes=array(
+    new DisplayAttribute(
+      '', _('Information about scope'),
+      'fdOIDCScope_info', true
+    ),
+
+    new StringAttribute(
+      _('Scope name'), _('OIDC scope'),
+      'fdOIDCScope_name', FALSE, ""
+      ), 
+    new StringAttribute(
+       _('Attributs'), _('Attributs'),
+       'fdOIDCScope_dn', FALSE,""
+       ),
+     new StringAttribute(
+       _('OIDC rules'), _('OIDC scope rules'),
+       'fdOIDCScope_rule', FALSE, ""
+       ), 
+   );
+   parent::__construct($description, $ldapName, $attributes,';','','');  
+
+ }
+}
+
 class samlCompositeAttributes extends CharSeparatedCompositeAttribute
 {
   function __construct ( $label, $description, $ldapName, $acl = ""){
@@ -533,7 +561,14 @@ class accessWebApplication extends simplePlugin
               _("une description quelconque"),
               'fdAccessApplicationOIDCAttributes'
             ),FALSE,[],TRUE),
-        
+            
+            new OrderedArrayAttribute(
+              new oidcScopeCompositeAttributes(
+                _("Scope"),
+                _("une description quelconque"),
+                'fdAccessApplicationOIDCScopes'
+              ),FALSE,[],TRUE),
+
           new OrderedArrayAttribute(
             new samlCompositeAttributes(
               _("Attributes"),
@@ -622,6 +657,7 @@ class accessWebApplication extends simplePlugin
       $this->attributesAccess['fdAccessApplicationSAMLAttributes']->setVisible(TRUE);
       $this->attributesAccess['fdAccessApplicationCASAttributes']->setVisible(FALSE);
       $this->attributesAccess['fdAccessApplicationOIDCAttributes']->setVisible(FALSE);
+      $this->attributesAccess['fdAccessApplicationOIDCScopes']->setVisible(FALSE);
 
     }else{
       // not an SAML type
@@ -650,6 +686,7 @@ class accessWebApplication extends simplePlugin
       $this->attributesAccess['fdAccessApplicationSAMLAttributes']->setVisible(FALSE);
       $this->attributesAccess['fdAccessApplicationCASAttributes']->setVisible(FALSE);
       $this->attributesAccess['fdAccessApplicationOIDCAttributes']->setVisible(TRUE);
+      $this->attributesAccess['fdAccessApplicationOIDCScopes']->setVisible(TRUE);
     }else{
       // not a OIDC type
       //$this->attributesAccess['fdAccessApplicationScopeRules']->setVisible(FALSE);
@@ -662,6 +699,7 @@ class accessWebApplication extends simplePlugin
       $this->attributesAccess['fdAccessApplicationSAMLAttributes']->setVisible(FALSE);
       $this->attributesAccess['fdAccessApplicationCASAttributes']->setVisible(TRUE);
       $this->attributesAccess['fdAccessApplicationOIDCAttributes']->setVisible(FALSE);
+      $this->attributesAccess['fdAccessApplicationOIDCScopes']->setVisible(FALSE);
     }
   
 
