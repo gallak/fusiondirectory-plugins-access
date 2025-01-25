@@ -207,7 +207,6 @@ class accessWebApplication extends simplePlugin
   /* push config to remote SSO*/
   function pushconfig(){
     $this->createAccessConnection();
-    //$jsonAppData = $this->remoteAccessHandle->generateConfig($this->generateAppData()); 
     $localPivotConfiguration=$this->configLocalToPivot();
     $jsonAppData = $this->remoteAccessHandle->configPivotToRemote($localPivotConfiguration);
     var_dump("PUSHCONFIG");
@@ -259,8 +258,8 @@ class accessWebApplication extends simplePlugin
 
   function compareconfig(){
     
-    var_dump("Attribut dispo");    
-    var_dump($this->getAvailableAttributesbyDN());
+    //var_dump("Attribut dispo");    
+    //var_dump($this->getAvailableAttributesbyDN());
     
     $this->createAccessConnection();
     // get Remote SSO configuration
@@ -270,11 +269,6 @@ class accessWebApplication extends simplePlugin
     $remotePivot=$this->remoteAccessHandle->configRemoteToPivot($this->fdAccessApplicationAuthType,$remoteconfig,$this->getAvailableAttributesbyCN());
     $localPivot=$this->configLocalToPivot();
     // get Local FD SSO configuration
-    //$localconfig = json_decode($this->remoteAccessHandle->generateConfig($this->generateAppData()),true);
-    
-    //var_dump($localconfig);
-    //
-    //var_dump($this->generateAppData());
     var_dump("Version LocalToPivot");
     var_dump($localPivot);
     var_dump("Version Remote to Pivot");
@@ -305,7 +299,6 @@ class accessWebApplication extends simplePlugin
       $this->attributesAccess['fdAccessApplicationOIDCClientID']->setValue($remotePivot["settings"]["clientId"]);
       $this->attributesAccess['fdAccessApplicationOIDCClientSecret']->setValue($remotePivot["settings"]["clientSecret"]);
       // attributes Management
-      //var_dump($this->attributesAccess['fdAccessApplicationOIDCAttributes']->getValue());
       
       global $config;
       $ldap = $config->get_ldap_link();
@@ -314,18 +307,18 @@ class accessWebApplication extends simplePlugin
       
      
        // FIXME
-      $ldap->cd($remotePivot["attributes"]["dn"]);
-      //foreach ($cleanConfig['exportedVars'] as $k => $v){
+       var_dump($remotePivot);
+      $ldap->cd($remotePivot["attributes"][$attrs]["dn"]);
         $ldap->search('(&(objectClass=fdAccessAttributes)(cn='.$attrs.'))', ['dn']);
           while( $attr_data = $ldap->fetch()) {
             $lattributs=$attr_data['dn'].";".$remotePivot["attributes"][$attrs]['friendlyName'];
-            if( $remotePivot["attributes"][$attrs]['scope']){
+            if( isset($remotePivot["attributes"][$attrs]['scope'])){
               $lattributs=$lattributs.";".$remotePivot["attributes"][$attrs]['scope'];
             }
-            if( $remotePivot["attributes"][$attrs]['format']){
+            if( isset($remotePivot["attributes"][$attrs]['format'])){
               $lattributs=$lattributs.";".$remotePivot["attributes"][$attrs]['format'];
             }
-            if( $remotePivot["attributes"][$attrs]['table']){
+            if( isset($remotePivot["attributes"][$attrs]['table'])){
               $lattributs=$lattributs.";".$remotePivot["attributes"][$attrs]['scope'];
             }
           }
@@ -334,9 +327,7 @@ class accessWebApplication extends simplePlugin
 
     }
     $this->attributesAccess['fdAccessApplicationOIDCAttributes']->setValue($lattributsArray);
-    //var_dump($this->attributesAccess['fdAccessApplicationOIDCAttributes']->getValue());
-    // dedicated Settings
-    //var_dump($this->getRemoteSSOMapping());
+
     if ($remotePivot["additionnalSettings"]){
     foreach ($this->getRemoteSSOMapping() as $fdAttr => $fdValue){
       foreach ($remotePivot["additionnalSettings"] as $remoteAttr => $remoteValue){
@@ -453,79 +444,6 @@ class accessWebApplication extends simplePlugin
 
   }
 
-
-
-  // get data form FD record and store it an associative array before translating it to remote Access server syntax ( pivot format)
-
-  //A retravailler
-  function generateAppData(){
-      global $config;
-      $ldap = $config->get_ldap_link();
-
-      $application=array();
-
-      // fetch attributs
-      foreach($this->fdAccessApplicationAttributes as $attribute_infos) {
-        $attribute_data=preg_split("/;/",$attribute_infos);
-        $attribute_dn=$attribute_data[0];
-        $attribute_mandatory=$attribute_data[1];
-        $attribute_scope=$attribute_data[2];
-        $attribute_samlformat=$attribute_data[3];
-        
-        $ldap->cd($attribute_dn);
-        $ldap->search('(objectClass=fdAccessAttributes)', ['cn','fdAccessAttributeOID','fdAccessAttributeAlias']);
-
-        while( $attr_data = $ldap->fetch()) {
-          $application['attributes'][$attr_data['cn'][0]]=array(
-            "friendlyName" => $attr_data['fdAccessAttributeAlias'][0],
-            "mandatory" => $attribute_mandatory,
-            "scope" => $attribute_scope,
-            "format" => $attribute_samlformat,
-            "name" => $attr_data['fdAccessAttributeOID'][0]
-        );
-        }
-
-
-      }
-      // build description
-      $ui = get_userinfo();
-      $today = date("d / m / y h:i");
-      $application['description'] = $this->parent->getBaseObject()->description."  / Modified by ".$ui->uid. " on ".$today;
-
-      //fetch app name
-      $application['appname']=$this->fdAccessApplicationConfKey;
-      //fetch auth type
-      $application['auth']=array('type' => $this->fdAccessApplicationAuthType);
-      // fetch macros
-
-      if ( ! empty($this->fdAccessApplicationMacros)){
-        $application['macros'] = $this->fdAccessApplicationMacros;
-      }
-
-      if (! empty($this->fdAccessApplicationSettings)){
-        $application['settings'] = $this->fdAccessApplicationSettings;
-      }
-
-      if (! empty($this->fdAccessApplicationOIDCClientID)){
-        $application['auth']['clientId']=$this->fdAccessApplicationOIDCClientID;
-      }
-      if (! empty($this->fdAccessApplicationOIDCClientSecret)){
-        $application['auth']['clientSecret']=$this->fdAccessApplicationOIDCClientSecret;
-      }
-      
-      if ( ! empty($this->fdAccessApplicationSAMLMetadataFile)){
-        $application['auth']['metadata'] = $this->fdAccessApplicationSAMLMetadataFile;
-      }
-
-      if ( ! empty($this->fdAccessEntityAuthority)){
-        $application['auth']['entityAuthority']=$this->fdAccessEntityAuthority;
-      }
-
-      // add service URI
-      $application['auth']['service']=$this->fdAccessApplicationService;
-
-      return($application);
-  }
 
 
   static function getAttributesInfo (): array
@@ -681,10 +599,7 @@ class accessWebApplication extends simplePlugin
   public function typeChanged(){
 
     $this->fdAccessApplicationAuthType=$this->attributesAccess['fdAccessApplicationAuthType']->getValue();
-    //$this->attributesAccess['fdAccessApplicationSettings']->setValue(array());
-    //$this->attributesAccess['fdAccessApplicationCASAttributes']->setVisible(FALSE);
-    //$this->attributesAccess['fdAccessApplicationSAMLAttributes']->setVisible(FALSE);
-    //$this->attributesAccess['fdAccessApplicationOIDCAttributes']->setVisible(FALSE);
+
     
     if ($this->fdAccessApplicationAuthType == "SAML" ){
       $this->attributesAccess['fdAccessApplicationSAMLMetadataFile']->setVisible(TRUE);
@@ -751,7 +666,6 @@ class accessWebApplication extends simplePlugin
     $this->fdAccessApplicationAuthServerDn = $this->attributesAccess['fdAccessApplicationAuthServerDn']->getValue();
     
     if ( empty($this->fdAccessApplicationAuthServerDn)) {
-      //var_dump( $this->fdAccessApplicationAuthServerDn);
       $this->attributesAccess['fdAccessApplicationPushConfiguration']->setVisible(FALSE);
       $this->attributesAccess['fdAccessApplicationCheckConfiguration']->setVisible(FALSE);
       $this->attributesAccess['fdAccessApplicationImportConfiguration']->setVisible(FALSE);
@@ -767,10 +681,7 @@ class accessWebApplication extends simplePlugin
 
     parent::__construct($dn, $object, $parent, $mainTab);
     
-    //var_dump($this->attributesAccess);
-                                      
-    //var_dump($this->fdAccessApplicationAttributes);
-                    
+                   
     $this->typeAuthentification=array('OIDC','SAML','CAS');
     $this->attributesAccess['fdAccessApplicationAuthType']->setChoices($this->typeAuthentification);
     $this->attributesAccess['fdAccessApplicationAuthServerDn']->setSubmitForm('serverChanged');
@@ -821,8 +732,6 @@ class accessWebApplication extends simplePlugin
   {
     $errors = parent::prepare_save();
   
-//mettre dans fdAccessApplicationAttributes  le contenu de fdAccessApplicationOIDCAttributes si OIDC  idem pour le chargemen
-
 
     if (!empty($errors)) {
       return $errors;

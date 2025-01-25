@@ -114,10 +114,8 @@ class accessMethodLemonLDAPNG {
 
 
 
-    // retrun all option per protocol
+    // return all option per protocol
     public function getRemoteAccessServerMapping($protocol){
-        //$handle= new accessRemoteLemonLDAPNG($this->serviceConfig);
-        //return($handle->getOptionsMapping($protocol));
         return($this->mappingLLNG[$protocol]);
     }
 
@@ -203,13 +201,17 @@ class accessMethodLemonLDAPNG {
         }
         // clean empty value in each sections
         // maybe use array_walk_recursive ?
+      
+
         foreach ($config as $k => $v){
             if (empty($v)){
                 unset($config[$k]);
             }else{
-                foreach ($config[$k] as $subk => $subv){
-                    if (empty($subv)){
-                        unset($config[$k][$subk]);
+                if ( is_array($config[$k])){
+                    foreach ($config[$k] as $subk => $subv){
+                        if (empty($subv)){
+                            unset($config[$k][$subk]);
+                        }
                     }
                 }
             }
@@ -221,8 +223,6 @@ class accessMethodLemonLDAPNG {
     function configRemoteToPivot($type,$remoteConfig,$availableAttributes){
 
         $cleanConfig=$this->cleanRemoteConfig($remoteConfig);
-        //var_dump("Version Clean Config");
-        //var_dump($cleanConfig);
         $remotePivot=array();
         // check Type of authentification
         // manage attributes
@@ -237,27 +237,6 @@ class accessMethodLemonLDAPNG {
                 $remotePivot['attributes'][$k]['name']=$availableAttributes[$k]['fdAccessAttributeOID'];
             }  
         }
-
-/*
-        global $config;
-        $ldap = $config->get_ldap_link();
-        // FIXME should be more optmized
-        $ldap->cd("dc=demo,dc=fusion");
-        foreach ($cleanConfig['exportedVars'] as $k => $v){
-            $ldap->search('(&(objectClass=fdAccessAttributes)(cn='.$k.'))', ['dn','fdAccessAttributeOID','fdAccessAttributeAlias']);
-            while( $attr_data = $ldap->fetch()) {
-                $remotePivot['attributes'][$k]['dn']=$attr_data['dn'];
-                if( empty($remotePivot['attributes'][$k]['friendlyName'])){
-                    $remotePivot['attributes'][$k]['friendlyName']=$attr_data['fdAccessAttributeAlias'][0];
-                }
-                if( empty($remotePivot['attributes'][$k]['name'])){
-                    $remotePivot['attributes'][$k]['name']=$attr_data['fdAccessAttributeOID'][0];
-                }        
-            }
-        }
-*/
-
-
 
 
 
@@ -278,8 +257,12 @@ class accessMethodLemonLDAPNG {
             // format and table of OIDC attribute
             foreach ($cleanConfig['exportedVars'] as $k => $v){
                 $attributes_array=explode(";",$v);
-                $remotePivot['attributes'][$k]['format']=$attributes_array[1];
-                $remotePivot['attributes'][$k]['table']=$attributes_array[2];
+                if (isset($attributes_array[1])){
+                    $remotePivot['attributes'][$k]['format']=$attributes_array[1];
+                }
+                if (isset($attributes_array[2])){
+                    $remotePivot['attributes'][$k]['table']=$attributes_array[2];
+                }
             }
             foreach ($cleanConfig['extraClaims'] as $k => $v){
                 $claims=explode(" ",$v);
@@ -379,7 +362,7 @@ class accessMethodLemonLDAPNG {
         // common
         $remoteConfig=array(
             'confKey'=> $pivotConfig['appname'],
-            'macros' => $pivotConfig['macro'],
+            'macros' => $pivotConfig['macros'],
             'options' => array('comment' => $pivotConfig['description'])
         );
         
@@ -418,143 +401,6 @@ class accessMethodLemonLDAPNG {
     }
 
 
-//on s'insipre d'en dessous
 
-
-    function generateConfig(array $appConfig) {
-        
-        $service=array();
-        // bug exportVars for cas and OIDC axportedAttributes for saml put it in dedicated portion code
-        $llngapp=array('confKey'=> $appConfig['appname'], "macros" => $appConfig['macro']); //, "options" => array());
-        $options_array=array("service","RedirectUris");
-        $optionnal_config_keys=array("macros", "options");
-
-        $mappingConfig=$this->getRemoteAccessServerMapping($appConfig['auth']['type']);
-
-        // set macros
-        foreach($appConfig['macros'] as $macro_infos) {
-            $array_macro=preg_split("/;/", $macro_infos);
-            $llngapp['macros'][$array_macro[0]]=$array_macro[1];
-          }
-        //set options
-        foreach($appConfig['settings'] as $settings_infos) {
-            $array_settings=preg_split("/;/", $settings_infos);
-            // convert LL:NG internal value to API value ex : oidcRPMetaDataOptionRedirectUris  => redirectUris
-            $sub="/^".$this->mapping[$appConfig['auth']['type']]."Options/";
-            // remote options seems to be case Sensitive
-
-            $llng_field=$mappingConfig[$array_settings[0]]['remotesso'];
-
-            $newkey=lcfirst(preg_replace($sub,"",$llng_field));
-            // take care of multivaluated variables
-            
-            if ( in_array($newkey,  $options_array )){
-                if ( $llngapp['options'][$newkey] == null ){
-                    $llngapp['options'][$newkey]=array($array_settings[1]);   
-                }else{
-                    array_push($llngapp['options'][$newkey],$array_settings[1]);
-                }
-            }else{
-                $llngapp['options'][$newkey]=$array_settings[1];
-            }
-            //$llngapp['options'][$llng_field]=$array_settings[1];
-              
-        } 
-
-        // set description
-
-        $llngapp['options']['comment'] = $appConfig['description'];
-
-        // configuration manipulation for CAS method        
-        if ( $appConfig['auth']['type']== "CAS"){
-            $llng['exportedVars']=array();
-            // set Service URI
-            $llngapp['options']['service']=$appConfig['auth']['service'];
-            // set attributes
-            foreach( $appConfig['attributes'] as $key => $value){
-                $llngapp['exportedVars'][$key]=$value['friendlyName'];
-            }
-            
-               
-        }
-        // configuration manipulation for SAML method
-        if ( $appConfig['auth']['type']== "SAML"){
-            
-            $llng['exportedAttributes']=array();
-            // set attributes
-            foreach( $appConfig['attributes'] as $key => $value){
-                $llngapp['exportedAttributes'][$key]['friendlyName']=$value['friendlyName'];
-                $llngapp['exportedAttributes'][$key]['mandatory']=$value['mandatory'];
-                $llngapp['exportedAttributes'][$key]['name']=$value['name'];
-                
-                if ( $value['format'] == "URI" ){
-                    $llngapp['exportedAttributes'][$key]['format']="urn:oasis:names:tc:SAML:2.0:attrname-format:uri";    
-                }
-
-            }
-
-            //set metadata
-            if (isset($appConfig['auth']['metadata'])){
-                $llngapp['metadata']=$appConfig['auth']['metadata'];
-            }
-               
-        }
-
-        // configuration manipulation for OIDC method        
-        if ( $appConfig['auth']['type']== "OIDC"){
-            $llng['exportedVars']=array();
-            // add extraClaim
-            $scopeArray=array();
-
-            // Set dedicated settings redirectUris / clientId
-            $llngapp['redirectUris'] = $appConfig['auth']['service'];
-            $llngapp['clientId'] = $appConfig['auth']['clientId'];
-            // set settings clientSecret
-            if (! empty($appConfig['auth']['clientSecret'])){
-                $llngapp['options']['clientSecret']=$appConfig['auth']['clientSecret'];
-            }
-
-            //unset($llngapp['options']['service']);
-            // add attribute
-            foreach( $appConfig['attributes'] as $key => $value){
-                //var_dump($value);
-                $llngapp['exportedVars'][$key]=$value['friendlyName'];
-                if (! empty($value['scope'])){
-                    if ($scopeArray[$value['scope']] == null ){
-                        $scopeArray[$value['scope']]=$key;
-                    }else{
-                        $scopeArray[$value['scope']]=$scopeArray[$value['scope']]." ".$key;
-                    }
-                    
-                }
-            }
-            // add extraClaims
-            if (!empty($scopeArray)){
-                $llngapp['extraClaims']=$scopeArray;
-                //$llngapp['options']['extraClaims']=$scopeArray;
-            }
-            // /!\ en cas de replace , les valeurs sont mergée !!!  BUG ??????
-            // add scopeRules
-            if ($appConfig['scopeRules']){
-                //var_dump($appConfig['scopeRules']);
-                foreach( $appConfig['scopeRules'] as $value){
-                    $valueArray=preg_split("/;/",$value);
-                    $scopeRulesArray[$valueArray[0]]= $valueArray[1];
-                }
-                $llngapp['scopeRules']=$scopeRulesArray;
-
-            }
-        
-        }
-
-        
-        //clean empty values
-        foreach($optionnal_config_keys as $opt){
-            if ( count($llngapp[$opt]) == 0 ){
-                unset($llngapp[$opt]);
-            }    
-        }
-        return(json_encode($llngapp));
-    }
 
 }
