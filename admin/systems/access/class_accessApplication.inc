@@ -88,10 +88,10 @@
         _('Remote name'), _('OIDC scope'),
         'fdAccessApplicationAttributes_name', FALSE, ""
         ), 
-      new StringAttribute(
-        _('OIDC scope'), _('OIDC scope'),
-        'fdAccessApplicationAttributes_scope', FALSE, ""
-        ), 
+//      new StringAttribute(
+//        _('OIDC scope'), _('OIDC scope'),
+//        'fdAccessApplicationAttributes_scope', FALSE, ""
+//        ), 
   
       new SelectAttribute(
         _('Value type'), _('type of value'),
@@ -112,11 +112,6 @@ class oidcScopeCompositeAttributes extends CharSeparatedCompositeAttribute
  function __construct ( $label, $description, $ldapName, $acl = ""){
 
    $attributes=array(
-    new DisplayAttribute(
-      '', _('Information about scope'),
-      'fdOIDCScope_info', true
-    ),
-
     new StringAttribute(
       _('Scope name'), _('OIDC scope'),
       'fdOIDCScope_name', FALSE, ""
@@ -346,11 +341,6 @@ class accessWebApplication extends simplePlugin
         $ldap->search('(&(objectClass=fdAccessAttributes)(cn='.$attrs.'))', ['dn']);
           while( $attr_data = $ldap->fetch()) {
             $lattributs=$attr_data['dn'].";".$remotePivot["attributes"][$attrs]['friendlyName'];
-            if( isset($remotePivot["attributes"][$attrs]['scope'])){
-              $lattributs=$lattributs.";".$remotePivot["attributes"][$attrs]['scope'];
-            }else{
-              $lattributs=$lattributs.";;";
-            }
             if( isset($remotePivot["attributes"][$attrs]['format'])){
               $lattributs=$lattributs.";".$remotePivot["attributes"][$attrs]['format'];
             }else{
@@ -367,6 +357,20 @@ class accessWebApplication extends simplePlugin
 
     }
     $this->attributesAccess['fdAccessApplicationOIDCAttributes']->setValue($lattributsArray);
+
+    //scope info import
+    if ($remotePivot["scope"]){
+      $lscopeArray=array();
+      foreach ($remotePivot["scope"] as $pivot_k => $pivot_v){  
+        $lscope=$pivot_k.";".$pivot_v['attributs'];
+        if ($pivot_v['rules']){
+          $lscope=$lscope.";".$pivot_v['rules'];
+        }
+        $lscopeArray[]=$lscope;
+      }
+      $this->attributesAccess['fdAccessApplicationOIDCScopes']->setValue($lscopeArray);
+    }
+
 
     if ($remotePivot["additionnalSettings"]){
     foreach ($this->getRemoteSSOMapping() as $fdAttr => $fdValue){
@@ -450,11 +454,10 @@ class accessWebApplication extends simplePlugin
         "dn" => $attribute_data[0]
       );
       
-      
+     
         if ( $application['protocol'] == "OIDC" ){
-          $application['attributes'][$attr_id]["format"]=$attribute_data[3];
-          $application['attributes'][$attr_id]["table"]=$attribute_data[4];
-          $application['attributes'][$attr_id]["scope"]=$attribute_data[2];
+          $application['attributes'][$attr_id]["format"]=$attribute_data[2];
+          $application['attributes'][$attr_id]["table"]=$attribute_data[3];
         }
 
         if ( $application['protocol'] == "SAML" ){
@@ -465,6 +468,16 @@ class accessWebApplication extends simplePlugin
         if ( $application['protocol'] == "CAS" ){
         }
     }
+    // Scope management
+    if ( $application['protocol'] == "OIDC" ){
+      foreach($this->fdAccessApplicationOIDCScopes as $scope_infos){
+        $scope_data=preg_split("/;/",$scope_infos);
+        $scope_name=$scope_data[0];
+        $application['scope'][$scope_name]['attributs']=$scope_data[1];
+        $application['scope'][$scope_name]['rules']=$scope_data[0];
+      }
+    }
+
 
     //var_dump($application['attributes']);
     // fetch macros

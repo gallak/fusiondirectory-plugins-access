@@ -243,9 +243,6 @@ class accessMethodLemonLDAPNG {
             }  
         }
 
-
-
-
         $remotePivot['appname']=$cleanConfig['confKey'];
         $remotePivot['description']=$cleanConfig['options']['comment'];
         $remotePivot['macros']=$cleanConfig['macros'];
@@ -274,12 +271,15 @@ class accessMethodLemonLDAPNG {
                     $remotePivot['attributes'][$k]['table']="";
                 }
             }
+            
             foreach ($cleanConfig['extraClaims'] as $k => $v){
-                $claims=explode(" ",$v);
-                foreach ($claims as $claim){
-                    $remotePivot['attributes'][$claim]['scope']=$k;
-                }
+                $remotePivot['scope'][$k]['attributs']=$v;
             }
+
+            foreach ($cleanConfig['scopeRules'] as $k => $v){
+                $remotePivot['scope'][$k]['rules']=$v;
+            }
+                        
         }
 
 
