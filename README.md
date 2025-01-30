@@ -48,11 +48,11 @@ Some definitions are common such
  Some definitions are spécific
   - OIDC scope rule
   - SAML : metadata file / or SAML authority
-  -
+  
   
 Actually , 3 buttons exists
   - push : push configuration to to remote service
-  - check : check difference between local and remote application config (not terminated)
+  - check : check difference between local and remote application config
   - import : if configuration if different , we could choose to import remote configuration. (not fully implemented yet)
  
  #### when pushing configuration
@@ -64,25 +64,6 @@ Actually , 3 buttons exists
 ![App definition](./contrib/docs/llng-oidc-conf.png)
 ![Attribute definition](./contrib/docs/llng-oidc-app.png)
 
-
-## Todo
-  - Create dashboard
-  - Web Access application
-    - Import remote config
-    - Create SAML app configuration from Federated application (like RENATER or EDUGAIN) ( using the overload function of Lemonldap::ng)
-    - extract URL of service in order to define the URL protected
-  - SAML entity ID
-    - import part of XML file
-  - Taxonomy
-    - create a pre filled taxanomy for LemonLDAP::NG configuration
-  
-
-## How to install
-
-`git https://github.com/gallak/fusiondirectory-plugins-access.git`
-`mv fusiondirectory-plugins-access access`
-
-> need to rewrite the intallation procedure
 
 ### usage
 
