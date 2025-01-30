@@ -250,7 +250,6 @@ class accessMethodLemonLDAPNG {
 
 
         // I'm a OIDC config
-        
         if ($type == "OIDC"){
             // main setttings
             $remotePivot['settings']['service']=$cleanConfig['redirectUris'];
@@ -398,18 +397,12 @@ class accessMethodLemonLDAPNG {
             }
             // create 
             $remoteConfig['exportedVars'][$k]=$exportedVars;
-            if ( $pivotConfig['attributes'][$k]['scope']){
-                   $extraClaims[$pivotConfig['attributes'][$k]['scope']][]=$k;
-            } 
         }
-        foreach( $extraClaims as $scope => $claims){
-            $remoteConfig['extraClaims'][$scope]=implode(" ",$claims);
+
+        foreach( $pivotConfig['scope'] as $scope => $claims){
+            $remoteConfig['extraClaims'][$scope]=$claims['attributs'];
         }
         // options
         return($remoteConfig);
     }
-
-
-
-
 }

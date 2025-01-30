@@ -238,9 +238,6 @@ class accessWebApplication extends simplePlugin
     $this->createAccessConnection();
     $localPivotConfiguration=$this->configLocalToPivot();
     $jsonAppData = $this->remoteAccessHandle->configPivotToRemote($localPivotConfiguration);
-    var_dump("PUSHCONFIG");
-    var_dump($this->fdAccessApplicationAuthType);
-    var_dump($jsonAppData);
     $this->remoteAccessHandle->updateApplication($this->fdAccessApplicationAuthType, $jsonAppData);
   }
 
@@ -287,8 +284,6 @@ class accessWebApplication extends simplePlugin
 
   function compareconfig(){
     
-    //var_dump("Attribut dispo");    
-    //var_dump($this->getAvailableAttributesbyDN());
     
     $this->createAccessConnection();
     // get Remote SSO configuration
@@ -332,11 +327,9 @@ class accessWebApplication extends simplePlugin
       global $config;
       $ldap = $config->get_ldap_link();
 
-      foreach ($remotePivot["attributes"] as $attrs => $values){
-      
-     
-       // FIXME
-       var_dump($remotePivot);
+      foreach ($remotePivot["attributes"] as $attrs => $values){  
+      // FIXME
+      var_dump($remotePivot);
       $ldap->cd($remotePivot["attributes"][$attrs]["dn"]);
         $ldap->search('(&(objectClass=fdAccessAttributes)(cn='.$attrs.'))', ['dn']);
           while( $attr_data = $ldap->fetch()) {
