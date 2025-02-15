@@ -1,45 +1,40 @@
-information :
-  name : "access"
-  description : "plugin which allow to generate access configuration for webSSO (SAML/OIDC/CAS)"
-  version : "0.1"
-  authors : ['antoine.gallavardin@free.fr']
-  status : "dev"
+information:
+  name: "access"
+  description: "plugin which allow to generate access configuration for webSSO (SAML/OIDC/CAS)"
+  version: "0.1"
+  authors: ['antoine.gallavardin@free.fr']
+  status: "dev"
   screenshotUrl:
-   - https://raw.githubusercontent.com/gallak/fusiondirectory-plugins-access/master/contrib/docs/fed-attr-entity.png
-   - https://raw.githubusercontent.com/gallak/fusiondirectory-plugins-access/master/contrib/docs/llng-oidc-app.png
-   - https://raw.githubusercontent.com/gallak/fusiondirectory-plugins-access/master/contrib/docs/llng-oidc-conf.png
-   - https://raw.githubusercontent.com/gallak/fusiondirectory-plugins-access/master/contrib/docs/llng-oidc-scope-content.png
-   - https://raw.githubusercontent.com/gallak/fusiondirectory-plugins-access/master/contrib/docs/push-oidc.png 
-  logoUrl : https://raw.githubusercontent.com/gallak/fusiondirectory-plugins-access/master/html/themes/breezy/icons/48/apps/access.png
-  tags : ["administration","automation","server","plugin"]
-  license : "GPLv2"
-  origin : "source"
+   - "https://raw.githubusercontent.com/gallak/fusiondirectory-plugins-access/master/contrib/docs/fed-attr-entity.png"
+   - "https://raw.githubusercontent.com/gallak/fusiondirectory-plugins-access/master/contrib/docs/llng-oidc-app.png"
+   - "https://raw.githubusercontent.com/gallak/fusiondirectory-plugins-access/master/contrib/docs/llng-oidc-conf.png"
+   - "https://raw.githubusercontent.com/gallak/fusiondirectory-plugins-access/master/contrib/docs/llng-oidc-scope-content.png"
+   - "https://raw.githubusercontent.com/gallak/fusiondirectory-plugins-access/master/contrib/docs/push-oidc.png"
+  logoUrl: "https://raw.githubusercontent.com/gallak/fusiondirectory-plugins-access/master/html/themes/breezy/icons/48/apps/access.png"
+  tags: ["administration","automation","server","plugin"]
+  license: "GPLv2"
+  origin: "source"
 
-support :
-  provider : "community"
-  homeUrl : "https://github.com/gallak/fusiondirectory-plugins-access"
-  ticketUrl : "https://github.com/gallak/fusiondirectory-plugins-access/issues"
-  discussionUrl : "https://github.com/gallak/fusiondirectory-plugins-access/wiki"
+support:
+  provider: "community"
+  homeUrl: "https://github.com/gallak/fusiondirectory-plugins-access"
+  ticketUrl: "https://github.com/gallak/fusiondirectory-plugins-access/issues"
+  discussionUrl: "https://github.com/gallak/fusiondirectory-plugins-access/wiki"
   downloadUrl: "https://github.com/gallak/fusiondirectory-plugins-access/archive/refs/heads/master.zip"
-  schemaUrl : "https://schemas.fusiondirectory.info/"
+  schemaUrl: "https://schemas.fusiondirectory.info/"
 
 requirement:
-  fdVersion : 1.4
-  phpVersion : 7.2.0
+  fdVersion: "1.5"
+  phpVersion: "7.2.0"
 
-content :
-  fileList :
-  - './admin/systems/services/access/class_serviceAccess.inc'
-  - './admin/systems/class_accessServerSelectAttribute.inc'
-  - './admin/systems/access/class_accessAttributes.inc'
-  - './admin/systems/access/class_samlEntity.inc'
-  - './admin/systems/access/class_accessApplication.inc'
-  - './admin/systems/access/methods/class_LemonLDAPNG.inc'
-  - './admin/systems/access/methods/class_accessMethodKeyCloak.inc'
-  - './admin/systems/access/methods/class_accessMethodLemonLDAPNG.inc'
-  - './admin/systems/access/class_access.inc'
-  - './admin/systems/access/class_federation.inc'
-  - './admin/systems/access/accessApplication.tpl'
+content:
+  fileList:
+  - './configuration/backend/access/class_accessConfig.inc'
+  - './include/access/class_accessRemoteCommon.inc'
+  - './include/access/class_accessMethodKeyCloak.inc'
+  - './include/access/class_accessMethodLemonLDAPNG.inc'
+  - './include/access/class_accessRemoteLemonLDAPNG.inc'
+  - './include/access/class_accessRemoteKeyCloak.inc'
   - './html/themes/breezy/icons/48/apps/attributes.png'
   - './html/themes/breezy/icons/48/apps/access.png'
   - './html/themes/breezy/icons/16/apps/samlEntity.png'
@@ -47,13 +42,19 @@ content :
   - './html/themes/breezy/icons/16/apps/federation.png'
   - './locale/fr/fusiondirectory.po'
   - './locale/en/fusiondirectory.po'
+  - './management/access/services/class_serviceAccess.inc'
+  - './management/access/class_accessAttributes.inc'
+  - './management/access/class_accessApplication.inc'
+  - './management/access/class_accessServerSelectAttribute.inc'
+  - './management/access/class_accessManagement.inc'
+  - './management/access/class_federation.inc'
+  - './management/access/accessApplication.tpl'
   - './contrib/yaml/description.yaml'
+  - './contrib/screenshots/push-oidc.png'
+  - './contrib/screenshots/fed-attr-entity.png'
+  - './contrib/screenshots/llng-oidc-conf.png'
+  - './contrib/screenshots/access.png'
+  - './contrib/screenshots/llng-oidc-scope-content.png'
+  - './contrib/screenshots/llng-oidc-app.png'
   - './contrib/openldap/access-fd.schema'
   - './contrib/openldap/access-fd-conf.schema'
-  - './contrib/docs/llng-oidc-scope-content.bmp'
-  - './contrib/docs/push-oidc.png'
-  - './contrib/docs/fed-attr-entity.png'
-  - './contrib/docs/llng-oidc-conf.png'
-  - './contrib/docs/access.png'
-  - './contrib/docs/llng-oidc-app.png'
-  - './config/access/class_accessConfig.inc'
