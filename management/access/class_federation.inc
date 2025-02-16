@@ -182,6 +182,7 @@ class federationEntities {
            'o' => $this->getOrgName(),
            'mail' => $this->getOrgContactTechnical(),
            'cn' => $this->createNameService($this->getEntityID()),
+           'fdAccessApplicationConfKey' => $this->createNameService($this->getEntityID()),
            'fdAccessApplicationSAMLMetadataFile' => $this->getMetadata(),
            'labeledURI' => $this->getUrlService(),
            'fdApplicationTitle' => $this->getTitle(),
@@ -275,8 +276,6 @@ class federation extends simplePlugin
     $allEntitiesInfos=$federationObject->getAllEntities();
     // insert into ldap
     foreach( $allEntitiesInfos as $entity => $content){
-      // condition pour  les tests a enlever !!
-      if ( $entity == "https://apps.univ-lr.fr/idp/shibboleth" || $entity == "https://archive.espe-nice-toulon.fr" ){
         $dn = 'cn='.$content['cn'].','.$config->get_cfg_value('WebappsRDN').','.$config->current['BASE'];
         $ldap->cd($dn);
         $ldap->add($content);
@@ -284,7 +283,6 @@ class federation extends simplePlugin
           $error = new SimplePluginLdapError($this, $dn, LDAP_ADD, $ldap->get_error(), $ldap->get_errno());
           $error->display();
         }
-      }
     }
   }
 
