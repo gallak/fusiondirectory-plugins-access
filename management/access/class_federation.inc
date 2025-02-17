@@ -277,6 +277,9 @@ class federation extends simplePlugin
     // insert into ldap
     foreach( $allEntitiesInfos as $entity => $content){
         $dn = 'cn='.$content['cn'].','.$config->get_cfg_value('WebappsRDN').','.$config->current['BASE'];
+        if ($ldap->dn_exists($dn){
+          $ldap->delete($dn);
+        }
         $ldap->cd($dn);
         $ldap->add($content);
         if (!$ldap->success()) {
