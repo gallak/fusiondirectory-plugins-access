@@ -251,7 +251,7 @@ class federation extends simplePlugin
   {
     return [
       'plShortName'   => _('federation'),
-      'plDescription' => _('federation'),
+      'plDescription' => _('SAML federation Management'),
       'plObjectClass' => ['fdAccessFederation'],
       'plObjectType'  => ['federation' => [
         'name'        => _('federation'),
@@ -260,7 +260,8 @@ class federation extends simplePlugin
         'mainAttr'    => 'cn',
       ]],
       'plSearchAttrs'  => ['description'],
-
+      'plIcon'        => 'geticon.php?context=applications&icon=federation&size=48',
+      'plSmallIcon'   => 'geticon.php?context=applications&icon=federation&size=16',
       'plProvidedAcls'  => parent::generatePlProvidedAcls(static::getAttributesInfo())
     ];
   }
@@ -277,7 +278,7 @@ class federation extends simplePlugin
     // insert into ldap
     foreach( $allEntitiesInfos as $entity => $content){
         $dn = 'cn='.$content['cn'].','.$config->get_cfg_value('WebappsRDN').','.$config->current['BASE'];
-        if ($ldap->dn_exists($dn){
+        if ($ldap->dn_exists($dn)){
           $ldap->delete($dn);
         }
         $ldap->cd($dn);

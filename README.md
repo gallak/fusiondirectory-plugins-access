@@ -18,21 +18,53 @@ You could define SAML/OIDC/CAS applications and apply to a remote Access Service
 You could defined SAML Federation et fetch all metadata in order to overload configuration inside LemonLDAP
 
 ## Dependencies
-This plugin need taxonomy plugin because all config parameters is stored inside a taxonomy table. It's useful if settings of remote service are modified during software evolution.
+This plugin need the following plugins:
+  - systems : because, Access appears as a service associated to one or several servers
+  - applications : because each FD applications cold be associated to a access configuration plan to be pusshed to access server
+
+This plugin is compatible for Fusiondirectory version 1.5 ( fue to folder organization).
 This plugin need the restclient.php support and xml support for php.
 
-## Some screenshot and explanation
 
-### Access to the "Access" place
+## how to install
+```
+cd /tmp
+git clone https://github.com/gallak/fusiondirectory-plugins-access.git
+fusiondirectory-plugins-manager --install-plugin /tmp/fusiondirectory-plugins-access
+fusiondirectory-configuration-manager --update-locales --update-cache
+```
+
+# ROADMAP
+
+ - milestone 1 : V1.0 support of LemonLDAP::NG
+   - LEMONLDAP : full support of OIDC / CAS / SAML applications
+   - ALL : SSL support
+   - ALL : import / export / difference configuration
+   
+ - milestone 2 : V1.1 SAML Federation  / Portal / dashboard
+   - Overload value from Service Provider provided by saml federation
+   - Support of portal organisation ( logo / description / access Rule)
+   - Dashboard of applications ( how many use OIDC /SAML / CAS and wich attributes)
+
+ - milestone 3 : v1.2 Keycloak and SAML Tools
+   - Begining of suppot OIDC app from KeyCloak
+   - Support custom SAML Federation
+   - Create a custom wayf Portal
+   - Provide a way to autogenerate configuration for common SP ( like apache_mod_cas / apache_mod_mellon / apache_mod_oidconnect )
+
+
+# Some screenshot and explanation
+
+## Access to the "Access" place
  
-![Access to the access place](./contrib/docs/access.png)
-### Place where defining
+![Access to the access place](./contrib/screenshots/access.png)
+## Place where defining
   - SAML Federation  with the url of metadata. When all metadata are loaded, all SAML Entity ID are imported
   - Attributes used by the "Access" system with the current name , the friendly Name, the OID and a small description
 
-![Access to the access place](./contrib/docs/fed-attr-entity.png)
+![Access to the access place](./contrib/screenshots/fed-attr-entity.png)
 
-### Web access configuration
+## Web access configuration
 
 All web access configuration have a dedicated tab "access".
 This tab allow to defined 3 kind of webaccess protocole : 
@@ -55,20 +87,12 @@ Actually , 3 buttons exists
   - check : check difference between local and remote application config
   - import : if configuration if different , we could choose to import remote configuration. (not fully implemented yet)
  
- #### when pushing configuration
+ ## when pushing configuration
  
-![Push configuration](./contrib/docs/push-oidc.png)
+![Push configuration](./contrib/screenshots/push-oidc.png)
  
- #### Result on LemonLDAP::NG
+ ## Result on LemonLDAP::NG
  
-![App definition](./contrib/docs/llng-oidc-conf.png)
-![Attribute definition](./contrib/docs/llng-oidc-app.png)
-
-
-### usage
-
-see screenshoot
-
-
-
+![App definition](./contrib/screenshots/llng-oidc-conf.png)
+![Attribute definition](./contrib/screenshots/llng-oidc-app.png)
 
