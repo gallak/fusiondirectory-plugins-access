@@ -485,9 +485,10 @@ class accessWebApplication extends simplePlugin
     }
 
     if (! empty($this->fdAccessApplicationSettings)){
-      foreach ($this->fdAccessApplicationSettings as $value)
+      foreach ($this->fdAccessApplicationSettings as $value){
          $valueArray = explode(";", $value);
-      $application['additionnalSettings'][$valueArray[0]] =$valueArray[1];
+        $application['additionnalSettings'][$valueArray[0]] =$valueArray[1];
+      }
     }
     return($application);
 

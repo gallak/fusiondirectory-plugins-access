@@ -48,12 +48,12 @@ class accessMethodLemonLDAPNG {
                 ),
         "OIDC" => array(
                 "fdOIDCLogoutType"      => array(
-                        "remotesso" =>  "oidcRPMetaDataOptionsLogoutType",
+                        "remotesso" =>  "LogoutType",
                         "label"         => "Type of logout",
                         "validation" => "is_string"
                         ),
                 "fdOIDCAuthLevel"        => array(
-                        "remotesso"=>  "oidcRPMetaDataOptionsAuthnLevel",
+                        "remotesso"=>  "AuthnLevel",
                         "syntax" => "It must an integer corresponding to auth Level see : https://lemonldap-ng.org",
                         "range" => array("-3","5"),
                         "validation" => "is_select",          
@@ -85,32 +85,46 @@ class accessMethodLemonLDAPNG {
                 ),
         "SAML" => array(
                 "fdSAMLIDPInitiated"    => array(
-                        "remotesso" =>  "samlSPMetaDataOptionsEnableIDPInitiatedURL"
+                        "remotesso" =>  "EnableIDPInitiatedURL",
+                        "label" => "Enable IDP Initiated",
+                        "syntax" => "It must be a boolean",
+                        "validation" => "is_bool",
                         ),
                 "fdSAMLSignSLO"         => array(
-                        "remotesso" =>  "samlSPMetaDataOptionsSignSLOMessage"
+                        "remotesso" =>  "SignSLOMessage",
+                        "label" => "SLO Message signature",
+                        "syntax" => "It must be a boolean",
+                        "validation" => "is_string",
                         ),
                 "fdSAMLSignSSO"         => array(
-                        "remotesso" =>  "samlSPMetaDataOptionsSignSSOMessage"
+                        "remotesso" =>  "SignSSOMessage",
+                        "label" => "SSO Message signature",
+                        "syntax" => "It must be a string",
+                        "validation" => "is_string",
                         ),
                 "fdSAMLSignatureMethod" => array(
-                        "remotesso" =>  "samlSPMetaDataOptionsSignatureMethod"
+                        "remotesso" =>  "SignatureMethod",
+                        "label" => "Signature Method",
+                        "syntax" => "It must be a choice",
+                        "validation" => "is_string",
                         ),
                 "fdSAMLFederationEntityID" => array(
-                        "remotesso" =>  "samlSPMetaDataOptionsFederationEntityID",
+                        "remotesso" =>  "FederationEntityID",
                         "syntax" => "It must be an URL",
-                        'validation'=> 'is_string'
+                        "validation" => "is_string",
+                        "label" => "SAML Federation attached"
                         ),
                 "fdSAMLFederationOptionalAttributes" => array(
-                        "remotesso" =>  "samlSPMetaDataOptionsFederationOptionalAttributes",
+                        "remotesso" =>  "FederationOptionalAttributes",
                         "syntax" => "It must be an boolean",
-                        'validation'=> 'is_string',
-                        'label'=> 'Optionnal Attribtutes'),
+                        "validation" => "is_string",
+                        "label" => "Optionnal Attribtutes"
+                        ),
                 "fdSAMLFederationMandatoryAttributes" => array(
-                        "remotesso" =>  "samlSPMetaDataOptionsFederationRequiredAttributes", 
+                        "remotesso" =>  "FederationRequiredAttributes", 
                         "syntax" => "It must be an boolean",
-                        'validation'=> 'is_string',
-                        'label'=> 'Mandatory Attribtutes'
+                        "validation" => "is_string",
+                        "label" => "Mandatory Attribtutes"
                         ),
         ),
 
@@ -316,7 +330,6 @@ class accessMethodLemonLDAPNG {
         }        
         
         $imported['macros']=$arrayMacros;
-        //return($imported);
         return($imported);
     
     }
@@ -364,6 +377,8 @@ class accessMethodLemonLDAPNG {
     {
         // get MApping for current Access Server
         $mappingConfig=$this->getRemoteAccessServerMapping($pivotConfig['protocol']);
+        var_dump($pivotConfig);
+        print_r("===============<br>");
         $extraClaims=array();
         
         // common
@@ -389,7 +404,6 @@ class accessMethodLemonLDAPNG {
             }
             // create 
             $remoteConfig['exportedAttributes']=$exportedAttributes;
-            var_dump($exportedAttributes);
             
         }
 
@@ -425,7 +439,11 @@ class accessMethodLemonLDAPNG {
         }
 
 
-        // options
+        // additionnal Settings
+        foreach($pivotConfig['additionnalSettings'] as $k => $v){
+            $remoteConfig['options'][$mappingConfig[$k]['remotesso']] = $v;
+        }
+
         return($remoteConfig);
     }
 }
