@@ -418,7 +418,18 @@ class accessMethodLemonLDAPNG {
             //scope
             foreach( $pivotConfig['scope'] as $scope => $claims){
                 $remoteConfig['extraClaims'][$scope]=$claims['attributs'];
+                if ($claims['rules']){
+                    $remoteConfig['scopeRules'][$scope]=$claims['rules'];
+                }
             }
+/*
+            $application['scope'][$scope_name]['attributs']=$scope_data[1];
+            $application['scope'][$scope_name]['rules']=$scope_data[0];
+
+            "confKey": "app-oidc",
+            "scopeRules": {
+                "read": "$uid eq \"fd-admin\""
+            }, */
 
             // attributes
             foreach($pivotConfig['attributes'] as $k => $v){

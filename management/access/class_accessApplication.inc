@@ -470,7 +470,7 @@ class accessWebApplication extends simplePlugin
         $scope_data=preg_split("/;/",$scope_infos);
         $scope_name=$scope_data[0];
         $application['scope'][$scope_name]['attributs']=$scope_data[1];
-        $application['scope'][$scope_name]['rules']=$scope_data[0];
+        $application['scope'][$scope_name]['rules']=$scope_data[2];
       }
     }
 
