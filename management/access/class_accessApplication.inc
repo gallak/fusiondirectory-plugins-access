@@ -188,7 +188,6 @@ class accessWebApplication extends simplePlugin
       'plObjectClass' => ['fdAccessApplication'],
       'plObjectType'  => ['webApplication'],
       'plProvidedAcls'  => parent::generatePlProvidedAcls(static::getAttributesInfo()),
-      //'plFilter'      => '(&(objectClass=fdCantineInfo))',
       'plIcon'        => 'geticon.php?context=applications&icon=access&size=48',
       'plSmallIcon'   => 'geticon.php?context=applications&icon=access&size=16',
       'plSelfModify'  => TRUE,
@@ -495,6 +494,12 @@ class accessWebApplication extends simplePlugin
   }
 
 
+  public function generateClientSecret () {
+    global $config;
+    $result = bin2hex(random_bytes(50));
+    $this->fdAccessApplicationOIDCClientSecret = $result;
+  }
+
 
   static function getAttributesInfo (): array
   {
@@ -529,6 +534,9 @@ class accessWebApplication extends simplePlugin
           new StringAttribute(
                   _('Client Secret'), _('Client Secret'),
                   'fdAccessApplicationOIDCClientSecret', FALSE),
+          new ButtonAttribute(_('Generate Client Secret'), _('Generate Secret'),
+                  'fdAccessApplicationOIDCGenSecret', _('Generate'),'generateClientSecret'
+              ),
           // dedicated SAML
           new StringAttribute(
               _('Organization'), _('Organization'),
@@ -668,6 +676,7 @@ class accessWebApplication extends simplePlugin
       $this->attributesAccess['fdAccessApplicationCASAttributes']->setVisible(FALSE);
       $this->attributesAccess['fdAccessApplicationOIDCAttributes']->setVisible(FALSE);
       $this->attributesAccess['fdAccessApplicationOIDCScopes']->setVisible(FALSE);
+      $this->attributesAccess['fdAccessApplicationOIDCGenSecret']->setVisible(FALSE);
 
     }else{
       // not an SAML type
@@ -697,12 +706,13 @@ class accessWebApplication extends simplePlugin
       $this->attributesAccess['fdAccessApplicationCASAttributes']->setVisible(FALSE);
       $this->attributesAccess['fdAccessApplicationOIDCAttributes']->setVisible(TRUE);
       $this->attributesAccess['fdAccessApplicationOIDCScopes']->setVisible(TRUE);
+      $this->attributesAccess['fdAccessApplicationOIDCGenSecret']->setVisible(TRUE);
     }else{
       // not a OIDC type
       //$this->attributesAccess['fdAccessApplicationScopeRules']->setVisible(FALSE);
       $this->attributesAccess['fdAccessApplicationOIDCClientID']->setVisible(FALSE);
       $this->attributesAccess['fdAccessApplicationOIDCClientSecret']->setVisible(FALSE);
-  
+      $this->attributesAccess['fdAccessApplicationOIDCGenSecret']->setVisible(FALSE);  
     }
 
     if ($this->fdAccessApplicationAuthType == "CAS" ){
