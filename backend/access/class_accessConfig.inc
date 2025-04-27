@@ -19,7 +19,7 @@
   Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301, USA.
 */
 
-class dcimConfig extends simplePlugin
+class accessPluginConfig extends multiPluginSection
 {
   static function plInfo (): array
   {
@@ -27,9 +27,8 @@ class dcimConfig extends simplePlugin
       'plShortName'     => _('Access configuration'),
       'plDescription'   => _('FusionDirectory Access plugin configuration'),
       'plObjectClass'   => ['fdAccessPluginConf'],
-      //'plCategory'      => ['configuration'],
-      'plObjectType'    => ['configuration'],
-      'plPriority'      => 10,
+      'plCategory'      => ['configuration'],
+      'plObjectType'    => ['smallConfig'],
       'plProvidedAcls'  => parent::generatePlProvidedAcls(static::getAttributesInfo())
     ];
   }
