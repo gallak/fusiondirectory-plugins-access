@@ -139,12 +139,12 @@ class samlCompositeAttributes extends CharSeparatedCompositeAttribute
         'fdAccessApplicationAttributes_dn', FALSE,['attributes']
         ),
       new BooleanAttribute(
-        _('optional'), _('options'),
+        _('Mandatory'), _('options'),
         'fdAccessApplicationAttributes_mandatory', FALSE, FALSE
         ),
       new SelectAttribute(
         _('SAML Format'), _('Format to distribute attribute'),
-        'fdAccessApplicationAttributes_samlFormat', FALSE, ['URI','Basic','unspecified'],'',['URI','Basic','unspecified']
+        'fdAccessApplicationAttributes_samlFormat', FALSE, ['urn:oasis:names:tc:SAML:2.0:attrname-format:uri','urn:oasis:names:tc:SAML:2.0:attrname-format:basic','urn:oasis:names:tc:SAML:2.0:attrname-format:unspecified'],'',['URI','Basic','unspecified']
         )
       );
       parent::__construct($description, $ldapName, $attributes,';','',''); 
@@ -178,7 +178,6 @@ class accessWebApplication extends simplePlugin
   // handle contain remote Access Management Service
   private $remoteAccessHandle;
   private $applicationOptionsMapping=array();
-  public
 
   static function plInfo (): array
   {
@@ -188,7 +187,11 @@ class accessWebApplication extends simplePlugin
       'plPriority'    => 30,
       'plObjectClass' => ['fdAccessApplication'],
       'plObjectType'  => ['webApplication'],
-      'plProvidedAcls'  => parent::generatePlProvidedAcls(static::getAttributesInfo())
+      'plProvidedAcls'  => parent::generatePlProvidedAcls(static::getAttributesInfo()),
+      //'plFilter'      => '(&(objectClass=fdCantineInfo))',
+      'plIcon'        => 'geticon.php?context=applications&icon=access&size=48',
+      'plSmallIcon'   => 'geticon.php?context=applications&icon=access&size=16',
+      'plSelfModify'  => TRUE,
     ];
   }
 

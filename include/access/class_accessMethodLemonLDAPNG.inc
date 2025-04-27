@@ -328,11 +328,11 @@ class accessMethodLemonLDAPNG {
     function updateApplication($type,$content){
         $res=array();
         if ($this->ifExistApplication($type,$content['confKey'])){
-            var_dump($content);
+            //var_dump($content);
             var_dump(json_encode($content));
             $res=$this->replaceApplication($type,json_encode($content));
         }else{
-            var_dump($content);
+            //var_dump($content);
             $res=$this->addApplication($type,json_encode($content));
         }
         if ( preg_match("/^4..$/",$res['code'])){
@@ -364,7 +364,6 @@ class accessMethodLemonLDAPNG {
     {
         // get MApping for current Access Server
         $mappingConfig=$this->getRemoteAccessServerMapping($pivotConfig['protocol']);
-        //var_dump($mappingConfig);
         $extraClaims=array();
         
         // common
@@ -374,34 +373,58 @@ class accessMethodLemonLDAPNG {
             'options' => array('comment' => $pivotConfig['description'])
         );
         
-        $remoteConfig['redirectUris']=$pivotConfig['settings']['service'];
-        $remoteConfig['options']['redirectUris']=$pivotConfig['settings']['service'];
 
+        // dedicated part of SAML Protocol
+        if ($pivotConfig['protocol'] == "SAML"){
+            $remoteConfig['metadata']=$pivotConfig["settings"]['metadata'];
+
+            // attributes
+            foreach($pivotConfig['attributes'] as $k => $v){
+                $exportedAttributes[$k]=array(
+                        "mandatory" => strtolower($v['mandatory']),
+                        "name" => $v['name'],
+                        "friendlyName" => $v['friendlyName'],
+                        "format" => $v['format']                        
+                );
+            }
+            // create 
+            $remoteConfig['exportedAttributes']=$exportedAttributes;
+            var_dump($exportedAttributes);
+            
+        }
+
+        // dedicated part for OIDC protocol
         if ($pivotConfig['protocol'] == "OIDC"){
             $remoteConfig['clientId']=$pivotConfig['settings']['clientId'];
             $remoteConfig['options']['clientId']=$pivotConfig['settings']['clientId'];
             $remoteConfig['options']['clientSecret']=$pivotConfig['settings']['clientSecret'];
-        }
+            $remoteConfig['redirectUris']=$pivotConfig['settings']['service'];
+            $remoteConfig['options']['redirectUris']=$pivotConfig['settings']['service'];
 
-        // attributes
-
-        foreach($pivotConfig['attributes'] as $k => $v){
-            $exportedVars=$pivotConfig['attributes'][$k]['friendlyName'];
-            if ( $pivotConfig['attributes'][$k]['format']){
-                $exportedVars=$exportedVars.";".$pivotConfig['attributes'][$k]['format'];
+            //scope
+            foreach( $pivotConfig['scope'] as $scope => $claims){
+                $remoteConfig['extraClaims'][$scope]=$claims['attributs'];
             }
 
-            
-            if ( $pivotConfig['attributes'][$k]['table']){
-                $exportedVars=$exportedVars.";".$pivotConfig['attributes'][$k]['table'];   
+            // attributes
+            foreach($pivotConfig['attributes'] as $k => $v){
+                $exportedVars=$pivotConfig['attributes'][$k]['friendlyName'];
+                if ( $pivotConfig['attributes'][$k]['format']){
+                    $exportedVars=$exportedVars.";".$pivotConfig['attributes'][$k]['format'];
+                }
+    
+                
+                if ( $pivotConfig['attributes'][$k]['table']){
+                    $exportedVars=$exportedVars.";".$pivotConfig['attributes'][$k]['table'];   
+                }
+                // create 
+                $remoteConfig['exportedVars'][$k]=$exportedVars;
             }
-            // create 
-            $remoteConfig['exportedVars'][$k]=$exportedVars;
+
+
         }
 
-        foreach( $pivotConfig['scope'] as $scope => $claims){
-            $remoteConfig['extraClaims'][$scope]=$claims['attributs'];
-        }
+
         // options
         return($remoteConfig);
     }
