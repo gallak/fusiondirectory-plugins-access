@@ -177,7 +177,7 @@ class federationEntities {
         
         $attrObj=array(
           'objectClass' => array("fdWebApplication","fdAccessApplication"),
-          'fdAccessEntityAuthority' => $this->getRegistrationAuthority(),
+          'fdAccessEntityAuthority' => $this->getMetadataAuthority(),
           'fdAccessEntityType' => $this->getSAMLType(),
            'o' => $this->getOrgName(),
            'mail' => $this->getOrgContactTechnical(),
@@ -194,12 +194,12 @@ class federationEntities {
 
           $samlAttr=$this->getAttributes();
           if (! empty($samlAttr)){
-            $attrObj['fdAccessApplicationAttributes'] = $samlAttr;
+            $attrObj['fdAccessApplicationSAMLAttributes'] = $samlAttr;
           }
           // add specificOpotion
-//          $attrObj["fdAccessApplicationSettings"]= array(
-//            "samlSPMetaDataOptionsFederationEntityID;".$this->getRegistrationAuthority(),
-//          );
+          $attrObj["fdAccessApplicationSettings"]= array(
+            "samlSPMetaDataOptionsFederationEntityID;".$this->getMetadataAuthority(),
+          );
         $arrayEntities[$this->getEntityID()]=$attrObj;
         
 
