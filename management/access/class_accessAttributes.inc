@@ -62,10 +62,13 @@ class accessAttributes extends simplePlugin
                 new StringAttribute(
                   _('OID'), _('OID code'),
                   'fdAccessAttributeOID', TRUE),
+                new StringAttribute(
+                  _('SAML FriendlyName'), _('FriendlyName'),
+                  'fdAccessAttributeFriendlyName', TRUE),
                   new StringAttribute(
-                    _('Alias'), _('Alias'),
-                    'fdAccessAttributeAlias', TRUE),
-        ]
+                    _('OIDC Claims'), _('Claims'),
+                    'fdAccessAttributeClaims', TRUE),
+                  ]
       ]
     ];
   }
