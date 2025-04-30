@@ -21,7 +21,8 @@ class accessRemoteValidation{
     
     static private function is_integer($val, $range=array()){
         if ( ! empty($range)){
-            return(filter_var($val,FILTER_VALIDATE_INT,$range[0],$range[1]));
+            //return(filter_var($val,FILTER_VALIDATE_INT,$range[0],$range[1]));
+            return(in_array($val,range($range[0],$range[1])));
         }else{
             return(filter_var($val,FILTER_VALIDATE_INT));
         }
@@ -31,6 +32,7 @@ class accessRemoteValidation{
         //var_dump($val);
         return(is_string($val));
     }
+    
     
     static private function is_url($val, $range=array()){
         return(filter_var($val,FILTER_VALIDATE_URL));

@@ -39,23 +39,24 @@ class accessMethodLemonLDAPNG {
                 "remotesso"=>  "authnLevel",
                 "syntax" => "It must an integer corresponding to auth Level see : https://lemonldap-ng.org",
                 "range" => array("-3","5"),
-                "validation" => "is_select",          
+                "validation" => "is_integer",          
                 "label" => "Authentification level"
                 ),
             "fdCOMMONRule"        => array(
-                    "remotesso" =>  "rule",
-                    "syntax" => "It 's the description",
-                    "label" => "Activation Rule",
-                    "validation" => "is_string"
+                "remotesso" =>  "rule",
+                "syntax" => "It 's the description",
+                "label" => "Activation Rule",
+                "validation" => "is_string"
                 ),
     
         ),
         "CAS" => array(
                 "fdCASLogoutURL"        => array(
                         "remotesso" =>  "logout",
-                        "syntax" => "It must an URI",
+                        "syntax" => "It must a integer",
                         "label" => "Logout Url",
-                        "validation" => "is_string"
+                        "range" => array("-1","1"),
+                        "validation" => "is_integer"
                         ),
                 "fdCASRule"             => array(
                         "remotesso" =>  "rule",
@@ -108,25 +109,25 @@ class accessMethodLemonLDAPNG {
                         "validation" => "is_bool",
                         ),
                 "fdSAMLSignSLO"         => array(
-                        "remotesso" =>  "SignSLOMessage",
+                        "remotesso" =>  "signSLOMessage",
                         "label" => "SLO Message signature",
                         "syntax" => "It must be a boolean",
                         "validation" => "is_string",
                         ),
                 "fdSAMLSignSSO"         => array(
-                        "remotesso" =>  "SignSSOMessage",
+                        "remotesso" =>  "signSSOMessage",
                         "label" => "SSO Message signature",
-                        "syntax" => "It must be a string",
+                        "syntax" => "It must be a boolean",
                         "validation" => "is_string",
                         ),
                 "fdSAMLSignatureMethod" => array(
-                        "remotesso" =>  "SignatureMethod",
+                        "remotesso" =>  "signatureMethod",
                         "label" => "Signature Method",
                         "syntax" => "It must be a choice",
                         "validation" => "is_string",
                         ),
                 "fdSAMLFederationEntityID" => array(
-                        "remotesso" =>  "FederationEntityID",
+                        "remotesso" =>  "federationEntityID",
                         "syntax" => "It must be an URL",
                         "validation" => "is_string",
                         "label" => "SAML Federation attached"
@@ -230,8 +231,7 @@ class accessMethodLemonLDAPNG {
     /* remove empty value from remote config */
     function cleanRemoteConfig($remote){
         $config=$remote['data'];
-        //var_dump($config);
-        // clean phase of remote options config
+       // clean phase of remote options config
         $duplicate_data=['redirectUris','clientId'];
         foreach ($duplicate_data as $attr){
             unset($config['options'][$attr]);
@@ -392,11 +392,8 @@ class accessMethodLemonLDAPNG {
     function updateApplication($type,$content){
         $res=array();
         if ($this->ifExistApplication($type,$content['confKey'])){
-            //var_dump($content);
-            var_dump(json_encode($content));
             $res=$this->replaceApplication($type,json_encode($content));
         }else{
-            //var_dump($content);
             $res=$this->addApplication($type,json_encode($content));
         }
         if ( preg_match("/^4..$/",$res['code'])){
