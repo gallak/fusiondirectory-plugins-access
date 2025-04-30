@@ -22,7 +22,7 @@ This plugin need the following plugins:
   - systems : because, Access appears as a service associated to one or several servers
   - applications : because each FD applications cold be associated to a access configuration plan to be pusshed to access server
 
-This plugin is compatible for Fusiondirectory version 1.5 ( fue to folder organization).
+This plugin is compatible for Fusiondirectory version 1.5 ( due to folder organization).
 This plugin need the restclient.php support and xml support for php.
 
 
@@ -54,6 +54,19 @@ fusiondirectory-configuration-manager --update-locales --update-cache
 
 
 # Some screenshot and explanation
+
+## About attributes definition
+
+Each attributes used inside Access plugin msute declared before.
+the name of attribute corresponde to the internal attributes name used inside Access Server (usually, it corresponding to the LDAP field)
+For each attribute you MUST declared :
+  - name : name used inside the ACCESS system
+  - Description : a simple description
+  - OID : This is th Object IDentifier used usualauy for SAML ecosystem ( see SAML / OASIS documentation) (for SAML application support)
+  - FriendlyNAme: Additionnaly to the OID, a more userfrienly name could be provided (no warranty about usage on Service Provider side) ( for SAML application support)
+  - OIDC Claims : OIDC terms name ( for OIDC application support)
+
+Except to CAS protocol, the attributes mapping is done trough the previous name specified. For CAS protocol, there is no official Mappig attribut.
 
 ## Access to the "Access" place
  
