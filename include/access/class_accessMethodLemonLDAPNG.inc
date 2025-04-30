@@ -28,39 +28,56 @@ class accessMethodLemonLDAPNG {
     */
 
     private $mappingLLNG =array(
-        "COMMON" => array(),
+        "COMMON" => array(
+            "fdCOMMONComment"        => array(
+                "remotesso" =>  "comment",
+                "syntax" => "It's the description",
+                "label" => "Comment",
+                "validation" => "is_string"
+            ),
+            "fdCOMMONAuthLevel"        => array(
+                "remotesso"=>  "authnLevel",
+                "syntax" => "It must an integer corresponding to auth Level see : https://lemonldap-ng.org",
+                "range" => array("-3","5"),
+                "validation" => "is_select",          
+                "label" => "Authentification level"
+                ),
+            "fdCOMMONRule"        => array(
+                    "remotesso" =>  "rule",
+                    "syntax" => "It 's the description",
+                    "label" => "Activation Rule",
+                    "validation" => "is_string"
+                ),
+    
+        ),
         "CAS" => array(
-                "fdCASAuthLevel"        => array(
-                        "remotesso" =>  "casAppMetaDataOptionsAuthnLevel",
-                        "syntax" => "It must an integer corresponding to auth Level see : https://lemonldap-ng.org",
-                        "range" => array("-4","5")
-                        ),
                 "fdCASLogoutURL"        => array(
-                        "remotesso" =>  "casAppMetaDataOptionsLogout",
-                        "syntax" => "It must an URI"
+                        "remotesso" =>  "logout",
+                        "syntax" => "It must an URI",
+                        "label" => "Logout Url",
+                        "validation" => "is_string"
                         ),
                 "fdCASRule"             => array(
-                        "remotesso" =>  "casAppMetaDataOptionsRule"
+                        "remotesso" =>  "rule",
+                        "syntax" => "It must be an perl expression",
+                        "label" => "Access Rule",
+                        "validation" => "is_string"
                         ),
                 "fdCASUserAttribute"    => array(
-                        "remotesso" =>  "casAppMetaDataOptionsUserAttribute"
-                        ),
+                        "remotesso" =>  "userAttribute",
+                        "syntax" => "It must the name of attribute wich is send as username",
+                        "label" => "User Attribute",
+                        "validation" => "is_string"
+                    ),
                 ),
         "OIDC" => array(
                 "fdOIDCLogoutType"      => array(
-                        "remotesso" =>  "LogoutType",
+                        "remotesso" =>  "logoutType",
                         "label"         => "Type of logout",
                         "validation" => "is_string"
                         ),
-                "fdOIDCAuthLevel"        => array(
-                        "remotesso"=>  "AuthnLevel",
-                        "syntax" => "It must an integer corresponding to auth Level see : https://lemonldap-ng.org",
-                        "range" => array("-3","5"),
-                        "validation" => "is_select",          
-                        "label" => "Authentification level"
-                        ),
                 "fdOIDCServiceEncAlgo"  => array(
-                        "remotesso" =>  "oidcServiceEncAlgorithmEnc", 
+                        "remotesso" =>  "EncAlgorithmEnc", 
                         "range"      => array("A256CBC-HS512","A256GCM","A192CBC-HS384","A192GCM","A128CBC-HS256","A128GCM"),
                         "validation" => "is_select",                        
                         "label"         => "Encryption algorithm"
@@ -85,7 +102,7 @@ class accessMethodLemonLDAPNG {
                 ),
         "SAML" => array(
                 "fdSAMLIDPInitiated"    => array(
-                        "remotesso" =>  "EnableIDPInitiatedURL",
+                        "remotesso" =>  "enableIDPInitiatedURL",
                         "label" => "Enable IDP Initiated",
                         "syntax" => "It must be a boolean",
                         "validation" => "is_bool",
@@ -135,7 +152,8 @@ class accessMethodLemonLDAPNG {
 
     // return all option per protocol
     public function getRemoteAccessServerMapping($protocol){
-        return($this->mappingLLNG[$protocol]);
+        
+        return(array_merge($this->mappingLLNG[$protocol],$this->mappingLLNG['COMMON']));
     }
 
     public function getMethodCode(): string{
@@ -244,21 +262,8 @@ class accessMethodLemonLDAPNG {
         $cleanConfig=$this->cleanRemoteConfig($remoteConfig);
         $remotePivot=array();
         // check Type of authentification
-        // manage attributes
-
-
-        foreach ($cleanConfig['exportedVars'] as $k => $v){
-            $remotePivot['attributes'][$k]['dn']=$availableAttributes[$k]['dn'];
-            if( empty($remotePivot['attributes'][$k]['friendlyName'])){
-                $remotePivot['attributes'][$k]['friendlyName']=$availableAttributes[$k]['fdAccessAttributeAlias'];
-            }
-            if( empty($remotePivot['attributes'][$k]['name'])){
-                $remotePivot['attributes'][$k]['name']=$availableAttributes[$k]['fdAccessAttributeOID'];
-            }  
-        }
 
         $remotePivot['appname']=$cleanConfig['confKey'];
-        $remotePivot['description']=$cleanConfig['options']['comment'];
         $remotePivot['macros']=$cleanConfig['macros'];
         $remotePivot['protocol']=$type;
 
@@ -269,19 +274,24 @@ class accessMethodLemonLDAPNG {
             $remotePivot['settings']['service']=$cleanConfig['redirectUris'];
             $remotePivot['settings']['clientId']=$cleanConfig['clientId'];
             $remotePivot['settings']['clientSecret']=$cleanConfig['options']['clientSecret'];
-            // format and table of OIDC attribute
+            // attribute OIDC is matched to the Fusion Attribute List trough the Claim name
             foreach ($cleanConfig['exportedVars'] as $k => $v){
                 $attributes_array=explode(";",$v);
-
-                if (isset($attributes_array[1])){
-                    $remotePivot['attributes'][$k]['format']=$attributes_array[1];
-                }else{
-                    $remotePivot['attributes'][$k]['format']="";
-                }
-                if (isset($attributes_array[2])){
-                    $remotePivot['attributes'][$k]['table']=$attributes_array[2];
-                }else{
-                    $remotePivot['attributes'][$k]['table']="";
+                foreach ($availableAttributes as $attr => $info){
+                    if ($info['fdAccessAttributeClaims'] == $k){
+                        $remotePivot['attributes'][$attr]['dn']=$info['dn'];
+                        if (isset($attributes_array[1])){
+                            $remotePivot['attributes'][$attr]['format']=$attributes_array[1];
+                        }else{
+                            $remotePivot['attributes'][$attr]['format']="";
+                        }
+                        if (isset($attributes_array[2])){
+                            $remotePivot['attributes'][$attr]['table']=$attributes_array[2];
+                        }else{
+                            $remotePivot['attributes'][$attr]['table']="";
+                        }
+                    break;
+                    }
                 }
             }
             
@@ -295,11 +305,52 @@ class accessMethodLemonLDAPNG {
                         
         }
 
+        if ($type == "CAS"){
+            foreach ($cleanConfig['exportedVars'] as $k => $v){
+                $remotePivot['attributes'][$k]['dn']=$availableAttributes[$k]['dn'];
+                $remotePivot['attributes'][$k]['remote_variable']=$v;
+            }
+            if ($cleanConfig['options']['service']){
+                $remotePivot['settings']['service']=$cleanConfig['options']['service'];
+            }
+        }
+
+        if ($type == "SAML"){
+            // fetch Metadata
+            $remotePivot['settings']['metadata'] = $cleanConfig['metadata'];
+
+
+            // attribute SAML is matched to the Fusion Attribute List trough the name (OID)
+            foreach ($cleanConfig['exportedAttributes'] as $k => $v){
+                foreach ($availableAttributes as $attr => $info){
+                    if ($info['fdAccessAttributeOID'] == $v['name']){
+                        $remotePivot['attributes'][$attr]['dn']=$info['dn'];
+                        if (isset($v['mandatory'])){
+                            $remotePivot['attributes'][$attr]['mandatory']=$v['mandatory'];
+                        }else{
+                            $remotePivot['attributes'][$attr]['mandatory']="";
+                        }
+                        if (isset($v['format'])){
+                            $remotePivot['attributes'][$attr]['format']=$v['format'];
+                        }else{
+                            $remotePivot['attributes'][$attr]['format']="";
+                        }
+                    break;
+                    }
+                }
+            }            
+        }
+
 
         foreach ($this->getRemoteAccessServerMapping($type) as $fdAttr => $fdValue){
             foreach ($cleanConfig['options'] as $remoteAttr => $remoteValue){
                 if ($fdValue['remotesso'] == $remoteAttr ){
-                    $remotePivot['additionnalSettings'][$fdAttr] =$remoteValue;
+                    /*if (is_array($remoteValue)){
+                        $value=implode("|",$remoteValue);
+                    }else{
+                        $value=$remoteValue;
+                    }*/
+                    $remotePivot['additionnalSettings'][$fdAttr] = $remoteValue;
                 }
             }
 
@@ -373,19 +424,16 @@ class accessMethodLemonLDAPNG {
 
     // Transforme Pivot Format to remote LL:NG
 
-    function configPivotToRemote($pivotConfig)
+    function configPivotToRemote($pivotConfig,$availableAttributes)
     {
         // get MApping for current Access Server
         $mappingConfig=$this->getRemoteAccessServerMapping($pivotConfig['protocol']);
-        var_dump($pivotConfig);
-        print_r("===============<br>");
         $extraClaims=array();
         
         // common
         $remoteConfig=array(
             'confKey'=> $pivotConfig['appname'],
             'macros' => $pivotConfig['macros'],
-            'options' => array('comment' => $pivotConfig['description'])
         );
         
 
@@ -397,16 +445,23 @@ class accessMethodLemonLDAPNG {
             foreach($pivotConfig['attributes'] as $k => $v){
                 $exportedAttributes[$k]=array(
                         "mandatory" => strtolower($v['mandatory']),
-                        "name" => $v['name'],
-                        "friendlyName" => $v['friendlyName'],
+                        "name" => $availableAttributes[$k]['fdAccessAttributeOID'],
+                        "friendlyName" => $availableAttributes[$k]['fdAccessAttributeFriendlyName'],
                         "format" => $v['format']                        
                 );
             }
-            // create 
             $remoteConfig['exportedAttributes']=$exportedAttributes;
             
         }
+        // dedicated part for CAS protocol
+        if ($pivotConfig['protocol'] == "CAS"){
+            $remoteConfig['options']['service'] = $pivotConfig['settings']['service'];
+             // attributes
+             foreach($pivotConfig['attributes'] as $k => $v){
+                $remoteConfig['exportedVars'][$k]=$v['remote_variable'];
+             }
 
+        }
         // dedicated part for OIDC protocol
         if ($pivotConfig['protocol'] == "OIDC"){
             $remoteConfig['clientId']=$pivotConfig['settings']['clientId'];
@@ -422,36 +477,30 @@ class accessMethodLemonLDAPNG {
                     $remoteConfig['scopeRules'][$scope]=$claims['rules'];
                 }
             }
-/*
-            $application['scope'][$scope_name]['attributs']=$scope_data[1];
-            $application['scope'][$scope_name]['rules']=$scope_data[0];
-
-            "confKey": "app-oidc",
-            "scopeRules": {
-                "read": "$uid eq \"fd-admin\""
-            }, */
 
             // attributes
             foreach($pivotConfig['attributes'] as $k => $v){
-                $exportedVars=$pivotConfig['attributes'][$k]['friendlyName'];
+                $claim=$availableAttributes[$k]['fdAccessAttributeClaims'];
+                $exportedVars=$k;
                 if ( $pivotConfig['attributes'][$k]['format']){
                     $exportedVars=$exportedVars.";".$pivotConfig['attributes'][$k]['format'];
-                }
-    
-                
+                }                
                 if ( $pivotConfig['attributes'][$k]['table']){
                     $exportedVars=$exportedVars.";".$pivotConfig['attributes'][$k]['table'];   
                 }
                 // create 
-                $remoteConfig['exportedVars'][$k]=$exportedVars;
+                $remoteConfig['exportedVars'][$claim]=$exportedVars;
             }
-
-
         }
 
 
         // additionnal Settings
         foreach($pivotConfig['additionnalSettings'] as $k => $v){
+            /*if (preg_match("|",$v)){
+                $value=explode("|",$v);
+            }else{
+                $value=$v;
+            }*/
             $remoteConfig['options'][$mappingConfig[$k]['remotesso']] = $v;
         }
 

@@ -84,10 +84,10 @@
         _('Attribut'), _('Attribut'),
         'fdAccessApplicationAttributes_dn', FALSE,['attributes']
         ),
-      new StringAttribute(
-        _('Remote name'), _('OIDC scope'),
-        'fdAccessApplicationAttributes_name', FALSE, ""
-        ), 
+///      new StringAttribute(
+///        _('Remote name'), _('OIDC scope'),
+///        'fdAccessApplicationAttributes_name', FALSE, ""
+///        ), 
 //      new StringAttribute(
 //        _('OIDC scope'), _('OIDC scope'),
 //        'fdAccessApplicationAttributes_scope', FALSE, ""
@@ -160,7 +160,7 @@ class casCompositeAttributes extends CharSeparatedCompositeAttribute
         'fdAccessApplicationAttributes_dn', FALSE,['attributes']
         ),
       new StringAttribute(
-        _('Remote name'), _('OIDC scope'),
+        _('Remote name'), _('Remote Name'),
         'fdAccessApplicationAttributes_name', FALSE, ""
         )
     );
@@ -199,7 +199,7 @@ class accessWebApplication extends simplePlugin
   public function getAvailableAttributesbyDN(){
     global $config;
     $scope = "sub";
-    $ldapEntries = objects::ls("attributes", ['cn'=> 1, "description" => 1, "fdAccessAttributeOID" => 1,"fdAccessAttributeAlias" => 1],$config->current['BASE'], '(objectClass=*)', TRUE, $scope, FALSE, TRUE);
+    $ldapEntries = objects::ls("attributes", ['cn'=> 1, "description" => 1, "fdAccessAttributeClaims" => 1,"fdAccessAttributeOID" => 1,"fdAccessAttributeFriendlyName" => 1],$config->current['BASE'], '(objectClass=*)', TRUE, $scope, FALSE, TRUE);
     return($ldapEntries);
   }
 
@@ -239,7 +239,7 @@ class accessWebApplication extends simplePlugin
   function pushconfig(){
     $this->createAccessConnection();
     $localPivotConfiguration=$this->configLocalToPivot();
-    $jsonAppData = $this->remoteAccessHandle->configPivotToRemote($localPivotConfiguration);
+    $jsonAppData = $this->remoteAccessHandle->configPivotToRemote($localPivotConfiguration,$this->getAvailableAttributesbyCN());
     $this->remoteAccessHandle->updateApplication($this->fdAccessApplicationAuthType, $jsonAppData);
   }
 
@@ -314,58 +314,55 @@ class accessWebApplication extends simplePlugin
     $this->createAccessConnection();
     // get Remote SSO configuration
     $remoteconfig=$this->remoteAccessHandle->getApplication($this->fdAccessApplicationAuthType,$this->fdAccessApplicationConfKey);
+    var_dump($remoteconfig);
     $remotePivot=$this->remoteAccessHandle->configRemoteToPivot($this->fdAccessApplicationAuthType,$remoteconfig,$this->getAvailableAttributesbyCN());
-
+    var_dump($remotePivot);
     
     // main config management
     // common
-    $this->attributesAccess['fdAccessApplicationService']->setValue($remotePivot["settings"]["service"]);
+    // FIXME service pas inserer
+    
     // Per Protocol
     if ($remotePivot["protocol"] == "OIDC"){
+      $this->attributesAccess['fdAccessApplicationService']->setValue($remotePivot["settings"]["service"]);
       $this->attributesAccess['fdAccessApplicationOIDCClientID']->setValue($remotePivot["settings"]["clientId"]);
       $this->attributesAccess['fdAccessApplicationOIDCClientSecret']->setValue($remotePivot["settings"]["clientSecret"]);
-      // attributes Management
-      
-      global $config;
-      $ldap = $config->get_ldap_link();
-
       foreach ($remotePivot["attributes"] as $attrs => $values){  
-      // FIXME
-      var_dump($remotePivot);
-      $ldap->cd($remotePivot["attributes"][$attrs]["dn"]);
-        $ldap->search('(&(objectClass=fdAccessAttributes)(cn='.$attrs.'))', ['dn']);
-          while( $attr_data = $ldap->fetch()) {
-            $lattributs=$attr_data['dn'].";".$remotePivot["attributes"][$attrs]['friendlyName'];
-            if( isset($remotePivot["attributes"][$attrs]['format'])){
-              $lattributs=$lattributs.";".$remotePivot["attributes"][$attrs]['format'];
-            }else{
-              $lattributs=$lattributs.";;";
-            }
-            if( isset($remotePivot["attributes"][$attrs]['table'])){
-              $lattributs=$lattributs.";".$remotePivot["attributes"][$attrs]['table'];
-            }else{
-              $lattributs=$lattributs.";;";
-            }
+        $lattributsArray[]=$remotePivot["attributes"][$attrs]["dn"].";".$remotePivot["attributes"][$attrs]['format'].";".$remotePivot["attributes"][$attrs]['table'];
+      }
+      $this->attributesAccess['fdAccessApplicationOIDCAttributes']->setValue($lattributsArray);
+
+      //scope info import
+      if ($remotePivot["scope"]){
+        $lscopeArray=array();
+        foreach ($remotePivot["scope"] as $pivot_k => $pivot_v){  
+          $lscope=$pivot_k.";".$pivot_v['attributs'];
+          if ($pivot_v['rules']){
+            $lscope=$lscope.";".$pivot_v['rules'];
           }
-        $lattributsArray[]=$lattributs;
-      }
-
-    }
-    $this->attributesAccess['fdAccessApplicationOIDCAttributes']->setValue($lattributsArray);
-
-    //scope info import
-    if ($remotePivot["scope"]){
-      $lscopeArray=array();
-      foreach ($remotePivot["scope"] as $pivot_k => $pivot_v){  
-        $lscope=$pivot_k.";".$pivot_v['attributs'];
-        if ($pivot_v['rules']){
-          $lscope=$lscope.";".$pivot_v['rules'];
+          $lscopeArray[]=$lscope;
         }
-        $lscopeArray[]=$lscope;
+        $this->attributesAccess['fdAccessApplicationOIDCScopes']->setValue($lscopeArray);
       }
-      $this->attributesAccess['fdAccessApplicationOIDCScopes']->setValue($lscopeArray);
+    }
+    if ($remotePivot["protocol"] == "SAML"){
+      $this->attributesAccess['fdAccessApplicationSAMLMetadataFile']->setValue($remotePivot["settings"]["metadata"]);
+      $this->attributesAccess['fdAccessEntityType']->setValue("SP");
+      
+      foreach ($remotePivot["attributes"] as $attrs => $values){  
+        $lattributsArray[]=$remotePivot["attributes"][$attrs]["dn"].";".$remotePivot["attributes"][$attrs]['mandatory'].";".$remotePivot["attributes"][$attrs]['format'];
+      }
+      $this->attributesAccess['fdAccessApplicationSAMLAttributes']->setValue($lattributsArray);
+
     }
 
+    if ($remotePivot["protocol"] == "CAS"){
+      $this->attributesAccess['fdAccessApplicationService']->setValue($remotePivot["settings"]["service"]);
+      foreach ($remotePivot["attributes"] as $attrs => $values){  
+        $lattributsArray[]=$remotePivot["attributes"][$attrs]["dn"].";".$remotePivot["attributes"][$attrs]['remote_variable'];
+      }
+      $this->attributesAccess['fdAccessApplicationCASAttributes']->setValue($lattributsArray);
+    }
 
     if ($remotePivot["additionnalSettings"]){
     foreach ($this->getRemoteSSOMapping() as $fdAttr => $fdValue){
@@ -400,18 +397,13 @@ class accessWebApplication extends simplePlugin
     //Appname section
     $application['appname']=$this->fdAccessApplicationConfKey;
     // Common section
-    // build description
-    $ui = get_userinfo();
-    $today = date("d / m / y h:i");
-    $application['description'] = $this->parent->getBaseObject()->description."  / Modified by ".$ui->uid. " on ".$today;
-
     // Authentification Section
     $application['protocol']=$this->fdAccessApplicationAuthType;
 
-    // add service URI
-    $application['settings']['service']=$this->fdAccessApplicationService;    
-
     if ( $this->fdAccessApplicationAuthType == "OIDC"){
+      // add service URI
+      $application['settings']['service']=$this->fdAccessApplicationService;    
+
       if (! empty($this->fdAccessApplicationOIDCClientID)){
         $application["settings"]['clientId']=$this->fdAccessApplicationOIDCClientID;
       }
@@ -444,53 +436,52 @@ class accessWebApplication extends simplePlugin
       $attr_id=$availableAttributes[$attribute_data[0]]['cn'];
       // common values
       $application['attributes'][$attr_id] = array(
-        "friendlyName" => $availableAttributes[$attribute_data[0]]['fdAccessAttributeAlias'],
-        "name" => $availableAttributes[$attribute_data[0]]['fdAccessAttributeOID'],
         "dn" => $attribute_data[0]
       );
       
      
-        if ( $application['protocol'] == "OIDC" ){
-          $application['attributes'][$attr_id]["format"]=$attribute_data[2];
-          $application['attributes'][$attr_id]["table"]=$attribute_data[3];
-        }
-
-        if ( $application['protocol'] == "SAML" ){
-          $application['attributes'][$attr_id]["format"]=$attribute_data[2];
-          $application['attributes'][$attr_id]["mandatory"]=$attribute_data[1];
-        }
-
-        if ( $application['protocol'] == "CAS" ){
-        }
-    }
-    // Scope management
-    if ( $application['protocol'] == "OIDC" ){
-      foreach($this->fdAccessApplicationOIDCScopes as $scope_infos){
-        $scope_data=preg_split("/;/",$scope_infos);
-        $scope_name=$scope_data[0];
-        $application['scope'][$scope_name]['attributs']=$scope_data[1];
-        $application['scope'][$scope_name]['rules']=$scope_data[2];
+      if ( $application['protocol'] == "OIDC" ){
+        $application['attributes'][$attr_id]["format"]=$attribute_data[1];
+        $application['attributes'][$attr_id]["table"]=$attribute_data[2];
       }
-    }
 
+      if ( $application['protocol'] == "SAML" ){
+        $application['attributes'][$attr_id]["format"]=$attribute_data[2];
+        $application['attributes'][$attr_id]["mandatory"]=$attribute_data[1];
+      }
 
-    //var_dump($application['attributes']);
-    // fetch macros
-    if ( ! empty($this->fdAccessApplicationMacros)){
-      foreach ($this->fdAccessApplicationMacros as $k => $v){
-        $v_array=explode(";",$v);
+      if ( $application['protocol'] == "CAS" ){
+          $application['attributes'][$attr_id]["remote_variable"]=$attribute_data[1];
+          // add service URI
+          $application['settings']['service']=$this->fdAccessApplicationService;    
+        }
+      // Scope management
+      if ( $application['protocol'] == "OIDC" ){
+        foreach($this->fdAccessApplicationOIDCScopes as $scope_infos){
+          $scope_data=preg_split("/;/",$scope_infos);
+          $scope_name=$scope_data[0];
+          $application['scope'][$scope_name]['attributs']=$scope_data[1];
+          $application['scope'][$scope_name]['rules']=$scope_data[2];
+        }
+      }
+      // fetch macros
+      if ( ! empty($this->fdAccessApplicationMacros)){
+        foreach ($this->fdAccessApplicationMacros as $k => $v){
+          $v_array=explode(";",$v);
           $application['macros'][$v_array[0]] = $v_array[1];
+        }
       }
-    }
 
-    if (! empty($this->fdAccessApplicationSettings)){
-      foreach ($this->fdAccessApplicationSettings as $value){
-         $valueArray = explode(";", $value);
-        $application['additionnalSettings'][$valueArray[0]] =$valueArray[1];
+      if (! empty($this->fdAccessApplicationSettings)){
+        foreach ($this->fdAccessApplicationSettings as $value){
+          $valueArray = explode(";", $value);
+          $application['additionnalSettings'][$valueArray[0]] =$valueArray[1];
+        }
+      
       }
     }
     return($application);
-
+    
   }
 
 
@@ -576,28 +567,28 @@ class accessWebApplication extends simplePlugin
           new OrderedArrayAttribute(
             new oidcCompositeAttributes(
               _("Attributes"),
-              _("une description quelconque"),
+              _("Attributes OIDC"),
               'fdAccessApplicationOIDCAttributes'
             ),FALSE,[],TRUE),
             
             new OrderedArrayAttribute(
               new oidcScopeCompositeAttributes(
                 _("Scope"),
-                _("une description quelconque"),
+                _("OIDC Scope"),
                 'fdAccessApplicationOIDCScopes'
               ),FALSE,[],TRUE),
 
           new OrderedArrayAttribute(
             new samlCompositeAttributes(
               _("Attributes"),
-              _("une description quelconque"),
+              _("Attributes SAML"),
               'fdAccessApplicationSAMLAttributes'
             ),FALSE,[],TRUE),
 
           new OrderedArrayAttribute(
             new casCompositeAttributes(
               _("Attributes"),
-              _("une description quelconque"),
+              _("Attributes CAS"),
               'fdAccessApplicationCASAttributes'
             ),FALSE,[],TRUE),
             
@@ -712,10 +703,12 @@ class accessWebApplication extends simplePlugin
       //$this->attributesAccess['fdAccessApplicationScopeRules']->setVisible(FALSE);
       $this->attributesAccess['fdAccessApplicationOIDCClientID']->setVisible(FALSE);
       $this->attributesAccess['fdAccessApplicationOIDCClientSecret']->setVisible(FALSE);
-      $this->attributesAccess['fdAccessApplicationOIDCGenSecret']->setVisible(FALSE);  
+      $this->attributesAccess['fdAccessApplicationOIDCGenSecret']->setVisible(FALSE);
+      $this->attributesAccess['fdAccessApplicationService']->setVisible(FALSE);
     }
 
     if ($this->fdAccessApplicationAuthType == "CAS" ){
+      $this->attributesAccess['fdAccessApplicationService']->setVisible(TRUE);
       $this->attributesAccess['fdAccessApplicationSAMLAttributes']->setVisible(FALSE);
       $this->attributesAccess['fdAccessApplicationCASAttributes']->setVisible(TRUE);
       $this->attributesAccess['fdAccessApplicationOIDCAttributes']->setVisible(FALSE);
