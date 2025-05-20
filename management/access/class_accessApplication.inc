@@ -249,39 +249,57 @@ class accessWebApplication extends simplePlugin
   }
 
 
-  function array_diff_recursive($arr1, $arr2)  {
-    #thanks : https://stackoverflow.com/questions/3876435/recursive-array-diff
-      $outputDiff = [];
-      foreach ($arr1 as $key => $value)
-      {
-          //if the key exists in the second array, recursively call this function 
-          //if it is an array, otherwise check if the value is in arr2
-          if (array_key_exists($key, $arr2))
-          {
-              if (is_array($value))
-              {
-                  $recursiveDiff = $this->array_diff_recursive($value, $arr2[$key]);
-  
-                  if (count($recursiveDiff))
-                  {
-                      $outputDiff[$key] = $recursiveDiff;
-                  }
-              }
-              else if (!in_array($value, $arr2))
-              {
-                  $outputDiff[$key] = $value;
-              }
-          }
-          //if the key is not in the second array, check if the value is in 
-          //the second array (this is a quirk of how array_diff works)
-          else if (!in_array($value, $arr2))
-          {
-              $outputDiff[$key] = $value;
-          }
+// set recursive array as flat array, key is the path of final value
+  private function flatten($record, $out,$currentkey)	{
+    foreach($record as $k => $v){
+      if (is_array($v)){
+        if ( $currentkey == ""){
+          $chemin=$k;
+        }else{
+          $chemin=$currentkey." > ".$k;
+        }
+        $out=$this->flatten($v,$out,$chemin);
+      }else{
+        
+        if ( $currentkey == ""){
+          $out[$k]=$v;
+        }else{
+          $out[$currentkey." > ".$k]=$v;
+        }		
       }
-  
-      return $outputDiff;
+    }
+    return($out);
   }
+
+
+
+  function diff_config($local,$remote){
+    $AllOut=array();
+    $diff_config=array();
+    
+    // set recursive array as flat array, key is the path of final value
+    $flat_local=$this->flatten($local,$AllOut,"");
+    $flat_remote=$this->flatten($remote,$AllOut,"");
+    
+    // make diff in twice sens for getting all differences  
+    $diff_complete=array_merge(array_diff($flat_local,$flat_remote),array_diff($flat_remote,$flat_local));
+    // walk across all difference
+    foreach($diff_complete as $k => $v){
+      if (! isset($flat_local[$k])){
+        $local_value="N/A";
+      }else{
+        $local_value=$flat_local[$k];
+      }
+      $diff_config[$k]["local"]=$local_value;
+      if (! isset($flat_remote[$k])){
+        $remote_value="N/A";
+      }else{
+        $remote_value=$flat_remote[$k];
+      }
+      $diff_config[$k]["remote"]=$remote_value;
+    }
+    return $diff_config;
+    }
 
 
   function compareconfig(){
@@ -290,23 +308,22 @@ class accessWebApplication extends simplePlugin
     $this->createAccessConnection();
     // get Remote SSO configuration
     $remoteconfig=$this->remoteAccessHandle->getApplication($this->fdAccessApplicationAuthType,$this->fdAccessApplicationConfKey);
-    var_dump($remoteconfig);
+    //var_dump($remoteconfig);
     
     $remotePivot=$this->remoteAccessHandle->configRemoteToPivot($this->fdAccessApplicationAuthType,$remoteconfig,$this->getAvailableAttributesbyCN());
     $localPivot=$this->configLocalToPivot();
-    // get Local FD SSO configuration
-    var_dump("Version LocalToPivot");
-    var_dump($localPivot);
-    var_dump("Version Remote to Pivot");
-    var_dump($remotePivot);
 
-    var_dump("Diff LocalToPivot <=> RemotePivot");
-    var_dump($this->array_diff_recursive($localPivot,$remotePivot));
-    var_dump("Diff RemotePivot <=> LocalToPivot");
-    var_dump($this->array_diff_recursive($remotePivot,$localPivot));
-
-
-
+    $diffConf=$this->diff_config($localPivot,$remotePivot);
+    if ( $diffConf){
+      $diffTable="<table width='100%' border='1' border-collapse='collapse'><tr><th>"._("Value")."</th><th>"._("Local value")."</th><th>"._("Remote value")."</th><tr>";
+      foreach($this->diff_config($localPivot,$remotePivot) as $k => $v){
+        $diffTable=$diffTable."<tr><td>".$k."</td><td>".$v["local"]."</td><td>".$v["remote"]."</td><tr>";
+      }
+      $diffTable=$diffTable."</table>"; 
+    }else{
+      $diffTable=_("No differences found for supported options");
+    }
+    msg_dialog::display(_("Comparaison"), $diffTable,INFO_DIALOG);
   }
 
   /* import config from remote Configuration after pivot */

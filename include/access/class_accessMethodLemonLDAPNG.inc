@@ -386,9 +386,6 @@ class accessMethodLemonLDAPNG {
     }
 
 
-
-
-
     function updateApplication($type,$content){
         $res=array();
         if ($this->ifExistApplication($type,$content['confKey'])){
