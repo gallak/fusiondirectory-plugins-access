@@ -5,11 +5,11 @@ information:
   authors: ['antoine.gallavardin@free.fr']
   status: "dev"
   screenshotUrl:
-   - "https://raw.githubusercontent.com/gallak/fusiondirectory-plugins-access/master/contrib/docs/fed-attr-entity.png"
-   - "https://raw.githubusercontent.com/gallak/fusiondirectory-plugins-access/master/contrib/docs/llng-oidc-app.png"
-   - "https://raw.githubusercontent.com/gallak/fusiondirectory-plugins-access/master/contrib/docs/llng-oidc-conf.png"
-   - "https://raw.githubusercontent.com/gallak/fusiondirectory-plugins-access/master/contrib/docs/llng-oidc-scope-content.png"
-   - "https://raw.githubusercontent.com/gallak/fusiondirectory-plugins-access/master/contrib/docs/push-oidc.png"
+   - "https://raw.githubusercontent.com/gallak/fusiondirectory-plugins-access/master/contrib/screenshots/fed-attr-entity.png"
+   - "https://raw.githubusercontent.com/gallak/fusiondirectory-plugins-access/master/contrib/screenshots/llng-oidc-app.png"
+   - "https://raw.githubusercontent.com/gallak/fusiondirectory-plugins-access/master/contrib/screenshots/llng-oidc-conf.png"
+   - "https://raw.githubusercontent.com/gallak/fusiondirectory-plugins-access/master/contrib/screenshots/llng-oidc-scope-content.png"
+   - "https://raw.githubusercontent.com/gallak/fusiondirectory-plugins-access/master/contrib/screenshots/push-oidc.png"
   logoUrl: "https://raw.githubusercontent.com/gallak/fusiondirectory-plugins-access/master/html/themes/breezy/icons/48/apps/access.png"
   tags: ["administration","automation","server","plugin"]
   license: "GPLv2"
@@ -29,7 +29,6 @@ requirement:
 
 content:
   fileList:
-  - './configuration/backend/access/class_accessConfig.inc'
   - './include/access/class_accessRemoteCommon.inc'
   - './include/access/class_accessMethodKeyCloak.inc'
   - './include/access/class_accessMethodLemonLDAPNG.inc'
@@ -39,6 +38,7 @@ content:
   - './html/themes/breezy/icons/48/apps/access.png'
   - './html/themes/breezy/icons/16/apps/samlEntity.png'
   - './html/themes/breezy/icons/16/apps/attributes.png'
+  - './html/themes/breezy/icons/16/apps/access.png'
   - './html/themes/breezy/icons/16/apps/federation.png'
   - './locale/fr/fusiondirectory.po'
   - './locale/en/fusiondirectory.po'
