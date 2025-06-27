@@ -182,6 +182,8 @@ class accessRemoteLemonLDAPNG extends accessRemoteCommon {
         case "401":
                 $msg = "Login Password Incorrect";
                 break;
+        default:
+                $msg = $response->error;
 	}
 
 	return(array('code' => $code, 'msg' => $msg, 'data' => $data));

@@ -228,11 +228,18 @@ class accessWebApplication extends simplePlugin
     global $config;
     $ldap = $config->get_ldap_link();
     $ldap->cd($this->fdAccessApplicationAuthServerDn);
-    $ldap->search('(objectClass=fdAccessService)', ['fdAccessServiceType','fdAccessServiceURL','fdAccessServiceUser','fdAccessServicePassword']);
+    $ldap->search('(objectClass=fdAccessService)', ['fdAccessServiceType','fdAccessServiceURL','fdAccessServiceUser','fdAccessServicePassword','fdAccessServiceReqCert']);
     $attrs = $ldap->fetch();
     $serviceClass="accessMethod".$attrs['fdAccessServiceType'][0];
     $this->remoteAccessHandle = new $serviceClass;
-    $this->remoteAccessHandle->setConfig(array("base_url" => $attrs['fdAccessServiceURL'][0],"username" => $attrs['fdAccessServiceUser'][0], "password" => $attrs['fdAccessServicePassword'][0]));
+
+    // set curl SSL options
+    if ( $attrs['fdAccessServiceReqCert'][0] == "TRUE" ){
+      $curl_options=array(CURLOPT_SSL_VERIFYPEER => 1 ,CURLOPT_SSL_VERIFYHOST => 2 );
+    }else{
+      $curl_options=array(CURLOPT_SSL_VERIFYPEER => 0 ,CURLOPT_SSL_VERIFYHOST => 0 );
+    }
+    $this->remoteAccessHandle->setConfig(array("base_url" => $attrs['fdAccessServiceURL'][0],"username" => $attrs['fdAccessServiceUser'][0], "password" => $attrs['fdAccessServicePassword'][0], "curl_options" => $curl_options));
   }
 
   /* push config to remote SSO*/
@@ -308,7 +315,6 @@ class accessWebApplication extends simplePlugin
     $this->createAccessConnection();
     // get Remote SSO configuration
     $remoteconfig=$this->remoteAccessHandle->getApplication($this->fdAccessApplicationAuthType,$this->fdAccessApplicationConfKey);
-    //var_dump($remoteconfig);
     
     $remotePivot=$this->remoteAccessHandle->configRemoteToPivot($this->fdAccessApplicationAuthType,$remoteconfig,$this->getAvailableAttributesbyCN());
     $localPivot=$this->configLocalToPivot();
@@ -331,13 +337,8 @@ class accessWebApplication extends simplePlugin
     $this->createAccessConnection();
     // get Remote SSO configuration
     $remoteconfig=$this->remoteAccessHandle->getApplication($this->fdAccessApplicationAuthType,$this->fdAccessApplicationConfKey);
-    var_dump($remoteconfig);
     $remotePivot=$this->remoteAccessHandle->configRemoteToPivot($this->fdAccessApplicationAuthType,$remoteconfig,$this->getAvailableAttributesbyCN());
-    var_dump($remotePivot);
-    
-    // main config management
-    // common
-    // FIXME service pas inserer
+        
     
     // Per Protocol
     if ($remotePivot["protocol"] == "OIDC"){

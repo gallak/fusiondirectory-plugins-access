@@ -190,6 +190,16 @@ attributetype ( 1.3.6.1.4.1.38414.142.5.24 NAME 'fdAccessApplicationOIDCScopes'
         SYNTAX 1.3.6.1.4.1.1466.115.121.1.26
         )        
 
+attributetype ( 1.3.6.1.4.1.38414.142.5.26 NAME 'fdAccessServiceReqCert'
+        DESC 'FusionDirectory - Certificate request'
+        EQUALITY caseIgnoreIA5Match
+        SUBSTR caseIgnoreSubstringsMatch
+        SYNTAX 1.3.6.1.4.1.1466.115.121.1.26
+        SINGLE-VALUE 
+        )   
+
+
+
 # Object Class
 objectclass (1.3.6.1.4.1.38414.142.6.1 NAME 'fdAccessAttributes'
         DESC 'FusionDirectory - AccessAttributes Values'
@@ -201,7 +211,7 @@ objectclass (1.3.6.1.4.1.38414.142.4.1 NAME 'fdAccessService'
         SUP top AUXILIARY
         DESC 'FusionDirectory - AccessServer Config'
         MUST ()
-        MAY (fdAccessServiceURL $ fdAccessServiceType $ fdAccessServicePassword $ fdAccessServiceUser ))
+        MAY (fdAccessServiceURL $ fdAccessServiceType $ fdAccessServicePassword $ fdAccessServiceUser $ fdAccessServiceReqCert))
 
 # Object Class
 objectclass (1.3.6.1.4.1.38414.142.4.2 NAME 'fdAccessApplication'
