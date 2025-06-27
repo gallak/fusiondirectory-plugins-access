@@ -29,7 +29,6 @@ class accessRemoteValidation{
     }
 
     static private function is_string($val, $range=array()){
-        //var_dump($val);
         return(is_string($val));
     }
     
@@ -82,8 +81,6 @@ class accessRemoteCommon {
         }
 
     }
-
-    
 
 
 

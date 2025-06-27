@@ -336,10 +336,7 @@ class federation extends simplePlugin
     $this->createAccessConnection();
     $appData=$this->generateAppData();
     if ( ! empty($this->fdAccessApplicationAuthServerDn)){
-      //$this->applicationOptionsMapping=$this->remoteAccessHandle->getRemoteAccessServerMapping($appData['auth']['type']);
-      var_dump($appData);
       $jsonAppData = $this->remoteAccessHandle->generateConfig($appData); 
-      var_dump($jsonAppData);
       $this->remoteAccessHandle->updateApplication($appData['auth']['type'], $jsonAppData);
     }
   }
