@@ -40,24 +40,7 @@ class serviceAccess extends simpleService
 
       $obj = "accessMethod".$this->fdAccessServiceType;
       $cnx=new $obj;
-      
-      if ( $this->fdAccessServiceReqCert == "TRUE" ){
-        $curl_options=array(CURLOPT_SSL_VERIFYPEER => 1 ,CURLOPT_SSL_VERIFYHOST => 2 );
-      }else{
-        $curl_options=array(CURLOPT_SSL_VERIFYPEER => false ,CURLOPT_SSL_VERIFYHOST => false );
-      }
-
-      $cnxInfo = array("curl_options" => $curl_options, "base_url" => $this->fdAccessServiceURL,"username" => $this->fdAccessServiceUser, "password" => $this->fdAccessServicePassword);
-
-      
-      if ( $this->fdAccessServiceReqCert == "TRUE" ){
-        $curl_options=array(CURLOPT_SSL_VERIFYPEER => 1 ,CURLOPT_SSL_VERIFYHOST => 2 );
-      }else{
-        $curl_options=array(CURLOPT_SSL_VERIFYPEER => false ,CURLOPT_SSL_VERIFYHOST => false );
-      }
-
-      $cnxInfo = array("curl_options" => $curl_options, "base_url" => $this->fdAccessServiceURL,"username" => $this->fdAccessServiceUser, "password" => $this->fdAccessServicePassword);
-
+      $cnxInfo = array("base_url" => $this->fdAccessServiceURL,"username" => $this->fdAccessServiceUser, "password" => $this->fdAccessServicePassword);
       $res=$cnx->checkStatus($cnxInfo);
       if ( $res['code'] == "200" ) {
         msg_dialog::display(_('Acces LEMONLDAP'), "MESSAGE :". $res['data']['name']. " === " .$res['data']['status'] ,INFO_DIALOG);
@@ -93,14 +76,6 @@ class serviceAccess extends simpleService
           new SelectAttribute(
             _('Type of AccessService'), _('Type of Acces Service'),
             'fdAccessServiceType', FALSE, [],'',[]
-          ),
-          new BooleanAttribute(
-            _('force SSL'), _('Force SSL correct configuration'),
-            'fdAccessServiceReqCert', FALSE, FALSE
-          ),
-          new BooleanAttribute(
-            _('Force valid SSL'), _('Force SSL correct configuration'),
-            'fdAccessServiceReqCert', FALSE, FALSE
           ),
           new ButtonAttribute(_('check service'), _('Check service'),
               'fdAccessServiceCheck', _('Check'),'checkservice'
