@@ -86,7 +86,7 @@ class serviceAccess extends simpleService
             'fdAccessServiceType', FALSE, [],'',[]
           ),
           new BooleanAttribute(
-            _('force SSL'), _('Force SSL correct configuration'),
+            _('Force SSL Check'), _('Force SSL correct configuration'),
             'fdAccessServiceReqCert', FALSE, FALSE
           ),
           new ButtonAttribute(_('check service'), _('Check service'),
