@@ -512,7 +512,6 @@ class accessMethodLemonLDAPNG {
 
     // return all option per protocol
     public function getRemoteAccessServerMapping($protocol){
-        
         return(array_merge($this->mappingLLNG[$protocol],$this->mappingLLNG['COMMON']));
     }
 
@@ -635,7 +634,7 @@ class accessMethodLemonLDAPNG {
             $remotePivot['settings']['clientSecret']=$cleanConfig['options']['clientSecret'];
             // attribute OIDC is matched to the Fusion Attribute List trough the Claim name
             foreach ($cleanConfig['exportedVars'] as $k => $v){
-                $attributes_array=explode(";",$v);
+                $attributes_array=explode("|",$v);
                 foreach ($availableAttributes as $attr => $info){
                     if ($info['fdAccessAttributeClaims'] == $k){
                         $remotePivot['attributes'][$attr]['dn']=$info['dn'];
@@ -732,11 +731,11 @@ class accessMethodLemonLDAPNG {
      
         // import scopeRule
         foreach($res['data']['scopeRules'] as $key => $value){
-            $arrayScopeRule[]=$key.";".$value;
+            $arrayScopeRule[]=$key."|".$value;
         }
         // import macros
         foreach($res['data']['macros'] as $key => $value){
-            $arrayMacros[]=$key.";".$value;
+            $arrayMacros[]=$key."|".$value;
         }        
         
         $imported['macros']=$arrayMacros;
@@ -836,10 +835,10 @@ class accessMethodLemonLDAPNG {
                 $claim=$availableAttributes[$k]['fdAccessAttributeClaims'];
                 $exportedVars=$k;
                 if ( $pivotConfig['attributes'][$k]['format']){
-                    $exportedVars=$exportedVars.";".$pivotConfig['attributes'][$k]['format'];
+                    $exportedVars=$exportedVars."|".$pivotConfig['attributes'][$k]['format'];
                 }                
                 if ( $pivotConfig['attributes'][$k]['table']){
-                    $exportedVars=$exportedVars.";".$pivotConfig['attributes'][$k]['table'];   
+                    $exportedVars=$exportedVars."|".$pivotConfig['attributes'][$k]['table'];   
                 }
                 // create 
                 $remoteConfig['exportedVars'][$claim]=$exportedVars;

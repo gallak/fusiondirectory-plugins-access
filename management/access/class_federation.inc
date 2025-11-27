@@ -144,7 +144,7 @@ class federationEntities {
           $attr_dn=$ldap->fetch()["dn"];
 
           if ( $attr_dn != null){
-            $attrArray[]=$attr_dn.";".$mandatory.";;";
+            $attrArray[]=$attr_dn."|".$mandatory."||";
             
           }
 /*          FIXME : log in debug system
