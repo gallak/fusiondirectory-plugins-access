@@ -30,7 +30,7 @@ class accessManagement extends management
     return [
       'plShortName'   => _('Access Management'),
       'plTitle'       => _('Access management'),
-      'plDescription' => _('Manage Acces Management'),
+      'plDescription' => _('Manage Access Management'),
       'plIcon'        => 'geticon.php?context=applications&icon=access&size=48',
       'plSection'     => 'systems',
       'plPriority'    => 55,
@@ -38,6 +38,5 @@ class accessManagement extends management
     ];
   }
 }
-
 
 

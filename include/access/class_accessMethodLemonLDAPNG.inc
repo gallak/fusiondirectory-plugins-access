@@ -148,7 +148,7 @@ class accessMethodLemonLDAPNG {
                             "syntax" => "It must be a string",
                             "validation" => "is_select",
                             "label" => "Access Token signature algorithm",
-                            "range" => array("A256CBC-HS512","A256GCM","A192CBC-HS384","A192GCM","A128CBC-HS256","A128GCM"),
+                            "range" => array("RS256","A256CBC-HS512","A256GCM","A192CBC-HS384","A192GCM","A128CBC-HS256","A128GCM"),
                             ),
                         "fdOIDCadditionalAudiences" => array(
                             "remotesso" =>  "additionalAudiences",
@@ -634,7 +634,7 @@ class accessMethodLemonLDAPNG {
             $remotePivot['settings']['clientSecret']=$cleanConfig['options']['clientSecret'];
             // attribute OIDC is matched to the Fusion Attribute List trough the Claim name
             foreach ($cleanConfig['exportedVars'] as $k => $v){
-                $attributes_array=explode("|",$v);
+                $attributes_array=explode(";",$v);
                 foreach ($availableAttributes as $attr => $info){
                     if ($info['fdAccessAttributeClaims'] == $k){
                         $remotePivot['attributes'][$attr]['dn']=$info['dn'];
@@ -751,10 +751,10 @@ class accessMethodLemonLDAPNG {
         }else{
             $res=$this->addApplication($type,json_encode($content));
         }
-        if ( preg_match("/^4..$/",$res['code'])){
-            msg_dialog::display(_($type." application error"), sprintf(_("An error occurs during updating application. <br> %s <br> Detailed error : <br> %s"),$res['msg'],$res['data']['error']),ERROR_DIALOG);
-        }else{
+        if ( preg_match("/^20.$/",$res['code'])){
             msg_dialog::display(_($type." application information"), sprintf(_("Application has been successfully updated<br>Message : %s"),$res['msg']),INFO_DIALOG);
+        }else{
+            msg_dialog::display(_($type." application error"), sprintf(_("An error occurs during updating application. <br> %s <br> Detailed error : <br> %s"),$res['code']." ".$res['msg'],$res['data']['error']),ERROR_DIALOG);
         }
     }
 
@@ -775,7 +775,6 @@ class accessMethodLemonLDAPNG {
 
 
     // Transforme Pivot Format to remote LL:NG
-
     function configPivotToRemote($pivotConfig,$availableAttributes)
     {
         // get MApping for current Access Server
@@ -834,12 +833,14 @@ class accessMethodLemonLDAPNG {
             foreach($pivotConfig['attributes'] as $k => $v){
                 $claim=$availableAttributes[$k]['fdAccessAttributeClaims'];
                 $exportedVars=$k;
-                if ( $pivotConfig['attributes'][$k]['format']){
-                    $exportedVars=$exportedVars."|".$pivotConfig['attributes'][$k]['format'];
-                }                
-                if ( $pivotConfig['attributes'][$k]['table']){
-                    $exportedVars=$exportedVars."|".$pivotConfig['attributes'][$k]['table'];   
-                }
+                //if (($pivotConfig['attributes'][$k]['format'] !== "string") && ($pivotConfig['attributes'][$k]['table'] !== "auto")){
+                    if ( $pivotConfig['attributes'][$k]['format']){
+                        $exportedVars=$exportedVars.";".$pivotConfig['attributes'][$k]['format'];
+                    }                
+                    if ( $pivotConfig['attributes'][$k]['table']){
+                        $exportedVars=$exportedVars.";".$pivotConfig['attributes'][$k]['table'];   
+                    }
+                //}
                 // create 
                 $remoteConfig['exportedVars'][$claim]=$exportedVars;
             }
@@ -855,7 +856,6 @@ class accessMethodLemonLDAPNG {
             }*/
             $remoteConfig['options'][$mappingConfig[$k]['remotesso']] = $v;
         }
-
         return($remoteConfig);
     }
 }

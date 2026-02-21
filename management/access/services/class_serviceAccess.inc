@@ -50,14 +50,18 @@ class serviceAccess extends simpleService
       $cnxInfo = array("curl_options" => $curl_options, "base_url" => $this->fdAccessServiceURL,"username" => $this->fdAccessServiceUser, "password" => $this->fdAccessServicePassword);
 
       $res=$cnx->checkStatus($cnxInfo);
+
       if ( $res['code'] == "200" ) {
-        msg_dialog::display(_('Acces LEMONLDAP'), "MESSAGE :". $res['data']['name']. " === " .$res['data']['status'] ,INFO_DIALOG);
+        $status="<ul>";
+        foreach($res['data'] as $key => $value){
+            $status=$status."<li><b>".$key."</b>  : ".$value."</li>";
+        }
+        $status=$status."</ul>";
+        msg_dialog::display(_('Acces LEMONLDAP'), $status ,INFO_DIALOG);
       }else{
-        msg_dialog::display(_('Acces LEMONLDAP'), "MESSAGE :" .$res['msg'] ,WARNING_DIALOG);
+        msg_dialog::display(_('Acces LEMONLDAP'), "MESSAGE :" .$res['code']." ".$res['msg'] ,WARNING_DIALOG);
       }    
   }
-
-
 
 
   /*!
