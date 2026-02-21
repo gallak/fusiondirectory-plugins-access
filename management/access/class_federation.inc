@@ -20,7 +20,7 @@
  */
 
 
- /* federation entities are web application defined inside SAML federation as SP : Service Provider or IDP Identity Provider
+ /* fedhttps://metadata.federation.renater.fr/inrae/all.xmleration entities are web application defined inside SAML federation as SP : Service Provider or IDP Identity Provider
   those applications are fecth from SAML Federation and import as webApplication object with Acces tab */
 class federationEntities {
  
@@ -28,6 +28,7 @@ class federationEntities {
   public $entity;
    
   function __construct($url) {
+    
     $str = file_get_contents($url);
     $this->xml=simplexml_load_string($str) or die("Error: Cannot create object");
     $this->xml->registerXPathNamespace('md',"urn:oasis:names:tc:SAML:2.0:metadata");
@@ -123,38 +124,27 @@ class federationEntities {
 
     global $config;
     $ldap = $config->get_ldap_link();
-
+    $localAttributes = new accessLocalAttributes();
+    $allLocalAttributes= $localAttributes->getAvailableLocalAttributesbyOID();
+    
     $attrArray=array();
     if ($this->getSAMLType() == "SP" ){
       if ( ! empty($this->entity->children("md",true)->SPSSODescriptor->AttributeConsumingService)){
         foreach ($this->entity->children("md",true)->SPSSODescriptor->AttributeConsumingService->RequestedAttribute as  $attr){
           if (! empty($attr->attributes()->{'isRequired'})){
-            $mandatory=$attr->attributes()->{'isRequired'}->__toString();
+            $mandatory=strtoupper($attr->attributes()->{'isRequired'}->__toString());
           }else{
-            $mandatory="false";
+            $mandatory="FALSE";
           }
-        
+          $attr_oid=explode(":",$attr->attributes()->{'Name'}->__toString())[2];
+          $attr_format=$attr->attributes()->{'NameFormat'}->__toString();
+          $dn=$allLocalAttributes[$attr_oid]['dn'];
 
-
-          $attr_cn=$attr->attributes()->{'FriendlyName'}->__toString();
-          $attr_ou=get_ou('AccessAttributesRDN').$config->current['BASE'];
-          //$entities_dn=$config->get_cfg_value('WebappsRDN').','.$config->current['BASE'];
-          $ldap->cd($attr_ou);
-          $ldap->search('(&(objectClass=fdAccessAttributes)(cn='.$attr_cn.'))', ['dn']);
-          $attr_dn=$ldap->fetch()["dn"];
-
-          if ( $attr_dn != null){
-            $attrArray[]=$attr_dn."|".$mandatory."||";
-            
+          if ($dn){
+            $attrArray[]=$dn."|".$mandatory."|".$attr_format;
           }
-/*          FIXME : log in debug system
-            else{
-            $error = new FusionDirectoryError(htmlescape(sprintf(_('Error :"%s" is not declared on FusionDirectary Acces systems. Its necessary for %s '), $attr_cn, $this->entity->attributes()['entityID']->__toString())));
-            $error->display();
-  
-          }*/
+      }
 
-        }
       }
     }
     return($attrArray);

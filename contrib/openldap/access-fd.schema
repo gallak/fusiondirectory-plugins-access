@@ -198,13 +198,30 @@ attributetype ( 1.3.6.1.4.1.38414.142.5.26 NAME 'fdAccessServiceReqCert'
         SINGLE-VALUE 
         )   
 
+attributetype ( 1.3.6.1.4.1.38414.142.5.27 NAME 'fdAccessAttributePivot'
+        DESC 'FusionDirectory - Pivot Attributes for internal Access service use'
+        EQUALITY caseIgnoreIA5Match
+        SUBSTR caseIgnoreSubstringsMatch
+        SYNTAX 1.3.6.1.4.1.1466.115.121.1.26
+        SINGLE-VALUE 
+        )
+
+attributetype ( 1.3.6.1.4.1.38414.142.5.28 NAME 'fdAccessAttributeSource'
+        DESC 'FusionDirectory - Attributes name from source'
+        EQUALITY caseIgnoreIA5Match
+        SUBSTR caseIgnoreSubstringsMatch
+        SYNTAX 1.3.6.1.4.1.1466.115.121.1.26
+        SINGLE-VALUE 
+        )
+
+
 
 
 # Object Class
 objectclass (1.3.6.1.4.1.38414.142.6.1 NAME 'fdAccessAttributes'
         DESC 'FusionDirectory - AccessAttributes Values'
         MUST ()
-        MAY (cn $ description $ fdAccessAttributeOID $ fdAccessAttributeFriendlyName $ fdAccessAttributeClaims ))
+        MAY (fdAccessAttributePivot $ description $ fdAccessAttributeOID $ fdAccessAttributeFriendlyName $ fdAccessAttributeClaims $ fdAccessAttributeSource))
 
 # Object Class
 objectclass (1.3.6.1.4.1.38414.142.4.1 NAME 'fdAccessService'

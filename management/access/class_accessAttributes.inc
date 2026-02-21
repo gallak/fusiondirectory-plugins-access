@@ -39,7 +39,7 @@ class accessAttributes extends simplePlugin
         'name'        => _('attributes'),
         'icon'        => 'geticon.php?context=applications&icon=attributes&size=16',
         'ou'          => get_ou('AccessAttributesRDN'),
-        'mainAttr'    => 'cn',
+        'mainAttr'    => 'fdAccessAttributePivot',
       ]],
       'plSearchAttrs'  => ['description'],
 
@@ -54,21 +54,29 @@ class accessAttributes extends simplePlugin
         'name'  => _('Information'),
         'attrs' => [
                 new StringAttribute(
-                  _('Name'), _('Name of Attributes'),
-                  'cn', TRUE),
+                  _('Name'), _('name of attribute used inside remote access sytem'),
+                  'fdAccessAttributePivot', TRUE),
                 new StringAttribute(
-                  _('description '), _('description'),
+                  // description
+                  _('Description '), _('description'),
                   'description', TRUE),
                 new StringAttribute(
-                  _('OID'), _('OID code'),
+                  // SAML identifier
+                  _('SAML OID'), _('SAML Object IDentitifier'),
                   'fdAccessAttributeOID', TRUE),
                 new StringAttribute(
-                  _('SAML FriendlyName'), _('FriendlyName'),
+                  // SAML FriendlyName
+                  _('SAML FriendlyName'), _('SAML FriendlyName, human name'),
                   'fdAccessAttributeFriendlyName', TRUE),
+                  // OIDC name
                   new StringAttribute(
-                    _('OIDC Claims'), _('Claims'),
+                    _('OIDC Claims'), _('OIDC Claims '),
                     'fdAccessAttributeClaims', TRUE),
+                  new StringAttribute(
+                    _('Name of Source Attribute'), _('name of attribute fetch from Identity system , often a LDAP tree'),
+                    'fdAccessAttributeSource', TRUE),
                   ]
+                  
       ]
     ];
   }
@@ -84,6 +92,6 @@ class accessAttributes extends simplePlugin
   function compute_dn (): string
   {
     global $config;
-    return ("cn=".$this->cn.",".get_ou('AccessAttributesRDN').$config->current['BASE']);
+    return ("fdAccessAttributePivot=".$this->fdAccessAttributePivot.",".get_ou('AccessAttributesRDN').$config->current['BASE']);
   }
 }
