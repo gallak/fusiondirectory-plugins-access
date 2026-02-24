@@ -188,7 +188,7 @@ class federationEntities {
           }
           // add specificOpotion
           $attrObj["fdAccessApplicationSettings"]= array(
-            "samlSPMetaDataOptionsFederationEntityID;".$this->getMetadataAuthority(),
+            "fdSAMLFederationEntityID"."|".$this->getMetadataAuthority(),
           );
         $arrayEntities[$this->getEntityID()]=$attrObj;
         
@@ -305,9 +305,9 @@ class federation extends simplePlugin
     $application['auth']['type']="SAML";
     $application['settings']=array();
 
-    $application['settings'][]="fdSAMLFederationMandatoryAttributes;".$this->fdAccessFederationMandatoryAttribute;
-    $application['settings'][]="fdSAMLFederationOptionalAttributes;".$this->fdAccessFederationOptionalAttribute;
-    $application['settings'][]="fdSAMLFederationEntityID;".$federationObject->getMetadataAuthority();
+    $application['settings'][]="fdSAMLFederationMandatoryAttributes"."|".$this->fdAccessFederationMandatoryAttribute;
+    $application['settings'][]="fdSAMLFederationOptionalAttributes"."|".$this->fdAccessFederationOptionalAttribute;
+    $application['settings'][]="fdSAMLFederationEntityID"."|".$federationObject->getMetadataAuthority();
     
     $ui = get_userinfo();
     $today = date("d / m / y h:i");
