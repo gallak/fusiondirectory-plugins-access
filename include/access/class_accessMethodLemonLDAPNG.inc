@@ -696,7 +696,7 @@ class accessMethodLemonLDAPNG {
                     break;
                     }
                 }
-            }            
+            }
         }
 
 
@@ -746,16 +746,25 @@ class accessMethodLemonLDAPNG {
 
     function updateApplication($type,$content){
         $res=array();
+        // if application Exist, she's deleted before
         if ($this->ifExistApplication($type,$content['confKey'])){
-            $res=$this->replaceApplication($type,json_encode($content));
-        }else{
-            $res=$this->addApplication($type,json_encode($content));
-        }
-        if ( preg_match("/^20.$/",$res['code'])){
-            msg_dialog::display(_($type." application information"), sprintf(_("Application has been successfully updated<br>Message : %s"),$res['msg']),INFO_DIALOG);
-        }else{
-            msg_dialog::display(_($type." application error"), sprintf(_("An error occurs during updating application. <br> %s <br> Detailed error : <br> %s"),$res['code']." ".$res['msg'],$res['data']['error']),ERROR_DIALOG);
-        }
+
+          
+                $res=$this->replaceApplication($type,json_encode($content));
+                if ( preg_match("/^20.$/",$res['code'])){
+                    msg_dialog::display(_($type." application information"), sprintf(_("Application has been successfully updated<br>Message : %s"),$res['msg']),INFO_DIALOG);
+                }else{
+                    msg_dialog::display(_($type." application error"), sprintf(_("An error occurs during updating application. <br> %s <br> Detailed error : <br> %s"),$res['code']." ".$res['msg'],$res['data']['error']),ERROR_DIALOG);
+                }
+            }else{
+                $res=$this->addApplication($type,json_encode($content));
+                if ( preg_match("/^20.$/",$res['code'])){
+                    msg_dialog::display(_($type." application information"), sprintf(_("Application has been successfully Added<br>Message : %s"),$res['msg']),INFO_DIALOG);
+                }else{
+                    msg_dialog::display(_($type." application error"), sprintf(_("An error occurs during Adding application. <br> %s <br> Detailed error : <br> %s"),$res['code']." ".$res['msg'],$res['data']['error']),ERROR_DIALOG);
+                }
+            }
+        
     }
 
     function deleteApplication($type,$appConfKey){
@@ -764,11 +773,6 @@ class accessMethodLemonLDAPNG {
             $delfct="delete".ucfirst(strtolower($type))."App";
             $handle=new accessRemoteLemonLDAPNG($this->serviceConfig);
             $res=$handle->$delfct($appConfKey);
-        }
-        if ( preg_match("/^4..$/",$res['code'])){
-            msg_dialog::display(_($type." application error"), sprintf(_("An error occurs during updating application. <br> %s <br> Detailed error : <br> %s"),$res['msg'],$res['data']['error']),ERROR_DIALOG);
-        }else{
-            msg_dialog::display(_($type." application information"), sprintf(_("Application has been successfully deleted<br>Message : %s"),$res['msg']),INFO_DIALOG);
         }
     }
 
