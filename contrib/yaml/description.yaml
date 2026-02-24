@@ -30,7 +30,6 @@ requirement:
 content:
   fileList:
   - './configuration/backend/access/class_accessConfig.inc'
-  - './include/access/class_accessRemoteCommon.inc'
   - './include/access/class_accessMethodKeyCloak.inc'
   - './include/access/class_accessMethodLemonLDAPNG.inc'
   - './include/access/class_accessRemoteLemonLDAPNG.inc'
@@ -44,6 +43,7 @@ content:
   - './locale/en/fusiondirectory.po'
   - './management/access/services/class_serviceAccess.inc'
   - './management/access/class_accessAttributes.inc'
+  - './management/access/class_protoCompositeAttributes.inc'
   - './management/access/class_accessApplication.inc'
   - './management/access/class_accessServerSelectAttribute.inc'
   - './management/access/class_accessManagement.inc'
